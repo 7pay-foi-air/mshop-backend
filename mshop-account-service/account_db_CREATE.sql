@@ -86,9 +86,9 @@ CREATE TABLE user_account (
   CONSTRAINT fk_user_org FOREIGN KEY (uuid_organisation) REFERENCES organisation (uuid_organisation) ON DELETE SET NULL
 );
 
-ALTER TABLE user_account ADD CONSTRAINT user_account_email_uq UNIQUE (email);
-ALTER TABLE user_account ADD CONSTRAINT user_account_username_uq UNIQUE (username);
-ALTER TABLE user_account ADD CONSTRAINT user_account_phonenumber_uq UNIQUE (phone_number);
+CREATE UNIQUE INDEX user_account_email_uq ON user_account(email) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX user_account_username_uq ON user_account(username) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX user_account_phonenumber_uq ON user_account(phone_number) WHERE deleted_at IS NULL;
 
 CREATE TRIGGER user_account_set_updated_at
 BEFORE UPDATE ON user_account
