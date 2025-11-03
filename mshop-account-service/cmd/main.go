@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mshop/account-service/handlers"
 )
 
 func main() {
@@ -15,11 +16,7 @@ func main() {
 		})
 	})
 
-	r.POST("/register", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "User registered successfully",
-		})
-	})
+	r.POST("/register", handlers.RegisterHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
