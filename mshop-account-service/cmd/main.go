@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mshop/account-service/handlers"
 )
 
 func main() {
@@ -15,10 +16,12 @@ func main() {
 		})
 	})
 
+	r.POST("/register", handlers.RegisterHandler)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	r.Run(":" + port)
+	r.Run("0.0.0.0:" + port)
 }
