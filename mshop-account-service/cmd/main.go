@@ -18,7 +18,6 @@ func main() {
 	r.POST("/register", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User registered successfully",
-			"user_id": 123,
 		})
 	})
 
@@ -27,5 +26,5 @@ func main() {
 		port = "8080"
 	}
 
-	r.Run(":" + port)
+	r.Run("0.0.0.0:" + port)
 }
