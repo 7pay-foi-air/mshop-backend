@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN apk add --no-cache git
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
@@ -21,6 +21,6 @@ WORKDIR /root/
 COPY --from=builder /app/articles-service .
 COPY --from=builder /go/bin/dlv /dlv
 
-EXPOSE 8001 40000 9000
+EXPOSE 8081 40001 9001
 
-CMD ["/dlv", "--headless", "--listen=:40000", "--api-version=2", "exec", "./articles-service"]
+CMD ["/dlv", "--headless", "--listen=:40001", "--api-version=2", "exec", "./articles-service"]

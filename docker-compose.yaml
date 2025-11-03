@@ -1,0 +1,105 @@
+services:
+  account-service:
+    container_name: account-service
+    build:
+      context: ./mshop-account-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+      - "40000:40000"
+      - "9000:9000"
+    environment:
+      - DB_HOST=account-db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=account_db
+    depends_on:
+      - account-db
+    networks:
+      - app-network
+
+  account-db:
+    image: postgres:15
+    container_name: account-db
+    environment:
+      POSTGRES_DB: account_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    networks:
+      - app-network
+    volumes:
+      - account-db-data:/var/lib/postgresql/data
+
+  transactions-service:
+    container_name: transactions-service
+    build:
+      context: ./mshop-transactions-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8081:8081"
+      - "40001:40001"
+      - "9001:9001"
+    environment:
+      - DB_HOST=transactions-db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=transactions_db
+    depends_on:
+      - transactions-db
+    networks:
+      - app-network
+
+  transactions-db:
+    image: postgres:15
+    container_name: transactions-db
+    environment:
+      POSTGRES_DB: transactions_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    networks:
+      - app-network
+    volumes:
+      - transactions-db-data:/var/lib/postgresql/data
+
+  articles-service:
+    container_name: articles-service
+    build:
+      context: ./mshop-articles-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8082:8082"
+      - "40002:40002"
+      - "9002:9002"
+    environment:
+      - DB_HOST=articles-db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=articles_db
+    depends_on:
+      - articles-db
+    networks:
+      - app-network
+
+  articles-db:
+    image: postgres:15
+    container_name: articles-db
+    environment:
+      POSTGRES_DB: articles_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    networks:
+      - app-network
+    volumes:
+      - articles-db-data:/var/lib/postgresql/data
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  account-db-data:
+  transactions-db-data:
+  articles-db-data:
