@@ -15,7 +15,7 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusCreated, gin.H{
 		"message": "User registration request received",
 		"data": gin.H{
 			"first_name":   req.FirstName,
