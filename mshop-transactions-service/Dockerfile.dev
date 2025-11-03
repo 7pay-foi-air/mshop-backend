@@ -1,26 +1,11 @@
-FROM golang:1.25-alpine AS builder
-
-RUN apk add --no-cache git
-RUN go install github.com/go-delve/delve/cmd/dlv@latest
+FROM golang:1.25-alpine
 
 WORKDIR /app
-
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY . .
 
+RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o transactions-service cmd/main.go
 
-FROM alpine:latest
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-COPY --from=builder /app/transactions-service .
-COPY --from=builder /go/bin/dlv /dlv
-
-EXPOSE 8082 40002 9002
-
-CMD ["/dlv", "--headless", "--listen=:40002", "--api-version=2", "exec", "./transactions-service"]
+ENV GIN_MODE=debug
+EXPOSE 8080
+CMD ["./transactions-service"]

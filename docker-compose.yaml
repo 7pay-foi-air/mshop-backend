@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
-      - "40000:40000"
-      - "9000:9000"
     environment:
       - DB_HOST=account-db
       - DB_PORT=5432
@@ -38,8 +36,6 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8081:8081"
-      - "40001:40001"
-      - "9001:9001"
     environment:
       - DB_HOST=transactions-db
       - DB_PORT=5432
@@ -70,8 +66,6 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8082:8082"
-      - "40002:40002"
-      - "9002:9002"
     environment:
       - DB_HOST=articles-db
       - DB_PORT=5432
