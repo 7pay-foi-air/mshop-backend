@@ -1,0 +1,86 @@
+basePath: /
+definitions:
+  models.OrganizationRegisterRequest:
+    properties:
+      address:
+        example: Savska cesta 123, Zagreb
+        type: string
+      email:
+        example: info@mshop.hr
+        type: string
+      name:
+        example: mShop d.o.o.
+        type: string
+      oib:
+        example: "12345678901"
+        type: string
+      phone_number:
+        example: "+38515555555"
+        type: string
+    type: object
+  models.RegistrationRequest:
+    properties:
+      organization:
+        $ref: '#/definitions/models.OrganizationRegisterRequest'
+      user:
+        $ref: '#/definitions/models.UserRegisterRequest'
+    type: object
+  models.UserRegisterRequest:
+    properties:
+      email:
+        example: ivan@example.com
+        type: string
+      first_name:
+        example: Ivan
+        type: string
+      is_admin:
+        example: true
+        type: boolean
+      last_name:
+        example: Ivić
+        type: string
+      phone_number:
+        example: "+38599111222"
+        type: string
+      username:
+        example: ivan.ivic
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: API documentation for the account service
+  title: Account Service API
+  version: "1.0"
+paths:
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Receives user and organization registration data together and returns
+        confirmation message
+      parameters:
+      - description: Combined registration payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      tags:
+      - Registration
+swagger: "2.0"
