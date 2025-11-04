@@ -24,6 +24,8 @@ services:
       POSTGRES_DB: account_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
     networks:
       - app-network
     volumes:
@@ -54,6 +56,8 @@ services:
       POSTGRES_DB: transactions_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
     networks:
       - app-network
     volumes:
@@ -84,6 +88,8 @@ services:
       POSTGRES_DB: articles_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
     networks:
       - app-network
     volumes:
