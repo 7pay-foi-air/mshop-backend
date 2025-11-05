@@ -1,6 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE OR REPLACE FUNCTION set_updated_at_column()
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE FUNCTION set_updated_at_column()
 RETURNS trigger AS $$
 BEGIN
   NEW.updated_at = now();
@@ -8,7 +10,7 @@ RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION normalize_organisation_contact_email()
+CREATE FUNCTION normalize_organisation_contact_email()
 RETURNS trigger AS $$
 BEGIN
   IF NEW.contact_email IS NOT NULL THEN
@@ -49,8 +51,10 @@ CREATE TRIGGER organisation_normalize_contact_email
 -- +goose Down
 -- +goose StatementBegin
 DROP TRIGGER IF EXISTS organisation_set_updated_at ON organisation;
-DROP FUNCTION IF EXISTS set_updated_at_column;
 DROP TRIGGER IF EXISTS organisation_normalize_contact_email ON organisation;
-DROP FUNCTION IF EXISTS normalize_organisation_contact_email;
+
 DROP TABLE IF EXISTS organisation;
+
+DROP FUNCTION IF EXISTS set_updated_at_column;
+DROP FUNCTION IF EXISTS normalize_organisation_contact_email;
 -- +goose StatementEnd
