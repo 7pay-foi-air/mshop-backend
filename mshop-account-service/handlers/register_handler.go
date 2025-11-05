@@ -7,23 +7,24 @@ import (
 	"github.com/mshop/account-service/models"
 )
 
+// RegisterHandler godoc
+// @Description Receives user and organization registration data together and returns confirmation message
+// @Tags Registration
+// @Accept json
+// @Produce json
+// @Param request body models.RegistrationRequest true "Combined registration payload"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /api/v1/register [post]
 func RegisterHandler(c *gin.Context) {
-	var req models.UserRegisterRequest
+	var req models.RegistrationRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration payload"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "User registration request received",
-		"data": gin.H{
-			"first_name":   req.FirstName,
-			"last_name":    req.LastName,
-			"email":        req.Email,
-			"phone_number": req.PhoneNumber,
-			"username":     req.Username,
-			"is_admin":     req.IsAdmin,
-		},
+		"message": "Registration request received",
 	})
 }
