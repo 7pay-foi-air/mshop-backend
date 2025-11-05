@@ -101,6 +101,14 @@ const docTemplate = `{
         "models.UserRegisterRequest": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Savska cesta 14, Zagreb"
+                },
+                "date_of_birth": {
+                    "type": "string",
+                    "example": "1990-05-20"
+                },
                 "email": {
                     "type": "string",
                     "example": "ivan@example.com"
@@ -133,7 +141,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8081",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Account Service API",

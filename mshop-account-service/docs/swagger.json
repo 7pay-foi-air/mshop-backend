@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8081",
+    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/api/v1/register": {
@@ -95,6 +95,14 @@
         "models.UserRegisterRequest": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "Savska cesta 14, Zagreb"
+                },
+                "date_of_birth": {
+                    "type": "string",
+                    "example": "1990-05-20"
+                },
                 "email": {
                     "type": "string",
                     "example": "ivan@example.com"

@@ -2,19 +2,24 @@ package docs
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 func LaunchSwagger(port string) {
+	err := godotenv.Load("setup.env")
+	if err != nil {
+		log.Fatalf("Error loading setup.env file: %v", err)
+	}
+
 	host := os.Getenv("SWAGGER_HOST")
 	if host == "" {
-		host = os.Getenv("HOST")
-	}
-	if host == "" {
-		host = "localhost"
+		log.Fatal("Missing SWAGGER_HOST in setup.env")
 	}
 
 	host = strings.TrimPrefix(host, "http://")
@@ -35,8 +40,8 @@ func openBrowser(url string) {
 		cmd = "rundll32"
 		args = []string{"url.dll,FileProtocolHandler", url}
 	default:
-		cmd = "xdg-open"
-		args = []string{url}
+		cmd = "cmd.exe"
+		args = []string{"/c", "start", url}
 	}
 
 	exec.Command(cmd, args...).Start()

@@ -4,9 +4,11 @@ package models
 type UserRegisterRequest struct {
 	FirstName   string `json:"first_name" example:"Ivan"`
 	LastName    string `json:"last_name" example:"Ivić"`
+	Username    string `json:"username" example:"ivan.ivic"`
 	Email       string `json:"email" example:"ivan@example.com"`
 	PhoneNumber string `json:"phone_number" example:"+38599111222"`
-	Username    string `json:"username" example:"ivan.ivic"`
+	Address     string `json:"address" example:"Savska cesta 14, Zagreb"`
+	DateOfBirth string `json:"date_of_birth" example:"1990-05-20"`
 	IsAdmin     bool   `json:"is_admin" example:"true"`
 }
 

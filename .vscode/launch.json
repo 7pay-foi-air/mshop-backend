@@ -9,7 +9,7 @@
       "program": "${workspaceFolder}/mshop-account-service/cmd",
       "env": {
         "GIN_MODE": "debug",
-        "PORT": "8081"
+        "PORT": "8080"
       }
     }
     ]

@@ -15,7 +15,7 @@ import (
 // @title Account Service API
 // @version 1.0
 // @description API documentation for the account service
-// @host localhost:8081
+// @host localhost:8080
 // @BasePath /
 
 func main() {
