@@ -22,8 +22,8 @@ import (
 // @BasePath /
 
 func main() {
-	if err := godotenv.Load("setup.env"); err != nil {
-		log.Println("No setup.env file found")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
 	}
 
 	db.Init()

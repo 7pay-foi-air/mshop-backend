@@ -8,7 +8,15 @@ import (
 	"github.com/mshop/account-service/models"
 )
 
-func CreateOrganisation(tx *sql.Tx, orgUUID uuid.UUID, org models.OrganizationRegisterRequest) error {
+type RegistrationRepository struct {
+	db *sql.DB
+}
+
+func NewRegistrationRepository(db *sql.DB) *RegistrationRepository {
+	return &RegistrationRepository{db: db}
+}
+
+func (r *RegistrationRepository) CreateOrganisation(tx *sql.Tx, orgUUID uuid.UUID, org models.OrganizationRegisterRequest) error {
 	_, err := tx.Exec(`
 		INSERT INTO organisation (uuid_organisation, name, oib, address, contact_email, contact_phone)
 		VALUES ($1, $2, $3, $4, $5, $6)
@@ -23,7 +31,7 @@ func CreateOrganisation(tx *sql.Tx, orgUUID uuid.UUID, org models.OrganizationRe
 	return err
 }
 
-func CreateUser(tx *sql.Tx, userUUID, orgUUID uuid.UUID, user models.UserRegisterRequest, passwordHash string, dob time.Time) error {
+func (r *RegistrationRepository) CreateUser(tx *sql.Tx, userUUID, orgUUID uuid.UUID, user models.UserRegisterRequest, passwordHash string, dob time.Time) error {
 	_, err := tx.Exec(`
 		INSERT INTO user_account (
 			uuid_user, first_name, last_name, username, email, phone_number,

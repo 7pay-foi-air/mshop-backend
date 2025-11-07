@@ -36,8 +36,11 @@ func RegisterHandler(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
+	repo := repositories.NewRegistrationRepository(db.DB)
+
 	orgUUID := uuid.New()
-	if err := repositories.CreateOrganisation(tx, orgUUID, req.Organization); err != nil {
+
+	if err := repo.CreateOrganisation(tx, orgUUID, req.Organization); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create organisation"})
 		return
 	}
@@ -46,7 +49,7 @@ func RegisterHandler(c *gin.Context) {
 	dateOfBirth, _ := time.Parse("2006-01-02", req.User.DateOfBirth)
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("test123"), bcrypt.DefaultCost)
 
-	if err := repositories.CreateUser(tx, userUUID, orgUUID, req.User, string(hashedPassword), dateOfBirth); err != nil {
+	if err := repo.CreateUser(tx, userUUID, orgUUID, req.User, string(hashedPassword), dateOfBirth); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
