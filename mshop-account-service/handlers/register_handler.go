@@ -2,9 +2,14 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
+	"github.com/mshop/account-service/repositories"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // RegisterHandler godoc
@@ -24,7 +29,37 @@ func RegisterHandler(c *gin.Context) {
 		return
 	}
 
+	tx, err := db.DB.Begin()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback()
+
+	repo := repositories.NewRegistrationRepository(db.DB)
+
+	orgUUID := uuid.New()
+
+	if err := repo.CreateOrganisation(tx, orgUUID, req.Organization); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create organisation"})
+		return
+	}
+
+	userUUID := uuid.New()
+	dateOfBirth, _ := time.Parse("2006-01-02", req.User.DateOfBirth)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("test123"), bcrypt.DefaultCost)
+
+	if err := repo.CreateUser(tx, userUUID, orgUUID, req.User, string(hashedPassword), dateOfBirth); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Registration request received",
+		"message": "Registration successfull",
 	})
 }

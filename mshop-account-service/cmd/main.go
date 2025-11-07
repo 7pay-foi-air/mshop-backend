@@ -1,10 +1,13 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
 
@@ -19,6 +22,12 @@ import (
 // @BasePath /
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+
+	db.Init()
+
 	r := gin.Default()
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

@@ -12,14 +12,14 @@ import (
 )
 
 func LaunchSwagger(port string) {
-	err := godotenv.Load("setup.env")
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading setup.env file: %v", err)
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	host := os.Getenv("SWAGGER_HOST")
 	if host == "" {
-		log.Fatal("Missing SWAGGER_HOST in setup.env")
+		log.Fatal("Missing SWAGGER_HOST in .env")
 	}
 
 	host = strings.TrimPrefix(host, "http://")
