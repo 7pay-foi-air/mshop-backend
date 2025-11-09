@@ -25,13 +25,14 @@ import (
 func RegisterHandler(c *gin.Context) {
 	var req models.RegistrationRequest
 
-	if err := validation.ValidateRegistration(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration payload"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration payload"})
+	errors := validation.ValidateRegistration(req)
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
 		return
 	}
 

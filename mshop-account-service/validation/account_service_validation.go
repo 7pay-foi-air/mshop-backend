@@ -3,7 +3,6 @@ package validation
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mshop/account-service/models"
@@ -17,40 +16,41 @@ func NewValidator() *validator.Validate {
 	return v
 }
 
-func ValidateRegistration(req models.RegistrationRequest) error {
+func ValidateRegistration(req models.RegistrationRequest) []string {
+	var messages []string
+
 	if err := ValidateUser(req.User); err != nil {
-		return err
+		messages = append(messages, ValidateUser(req.User)...)
 	}
 	if err := ValidateOrganization(req.Organization); err != nil {
-		return err
+		messages = append(messages, ValidateOrganization(req.Organization)...)
 	}
-	return nil
+
+	return messages
 }
 
-func ValidateUser(user models.UserRegisterRequest) error {
+func ValidateUser(user models.UserRegisterRequest) []string {
+	var messages []string
+
 	if err := validate.Struct(user); err != nil {
-		var messages []string
 		for _, err := range err.(validator.ValidationErrors) {
 			messages = append(messages, ValidateFormat(err).Error())
 		}
-
-		return fmt.Errorf(strings.Join(messages, ", "))
 	}
 
-	return nil
+	return messages
 }
 
-func ValidateOrganization(organization models.OrganizationRegisterRequest) error {
+func ValidateOrganization(organization models.OrganizationRegisterRequest) []string {
+	var messages []string
+
 	if err := validate.Struct(organization); err != nil {
-		var messages []string
 		for _, err := range err.(validator.ValidationErrors) {
 			messages = append(messages, ValidateFormat(err).Error())
 		}
-
-		return fmt.Errorf(strings.Join(messages, "; "))
 	}
 
-	return nil
+	return messages
 }
 
 func validateOIB(fl validator.FieldLevel) bool {
@@ -69,7 +69,7 @@ func ValidateFormat(err validator.FieldError) error {
 	case "numeric":
 		return fmt.Errorf("%s not a valid number", err.Field())
 	case "datetime":
-		return fmt.Errorf("%s is not a valid datetime", err.Field())
+		return fmt.Errorf("%s is not a valid date", err.Field())
 	case "min":
 		return fmt.Errorf("%s is too short", err.Field())
 	case "len":
