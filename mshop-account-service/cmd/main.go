@@ -37,6 +37,8 @@ func main() {
 
 	r.POST("api/v1/register", handlers.RegisterHandler)
 
+	r.POST("api/v1/login", handlers.LoginHandler)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
