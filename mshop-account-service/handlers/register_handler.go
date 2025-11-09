@@ -32,7 +32,11 @@ func RegisterHandler(c *gin.Context) {
 
 	errors := validation.ValidateRegistration(req)
 	if len(errors) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": errors})
+		c.JSON(http.StatusBadRequest, validation.ErrorResponse{
+			Code:   http.StatusBadRequest,
+			Status: "error",
+			Errors: errors,
+		})
 		return
 	}
 

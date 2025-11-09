@@ -6,7 +6,7 @@ type UserRegisterRequest struct {
 	LastName    string `json:"last_name" example:"Ivić" validate:"required,min=3"`
 	Username    string `json:"username" example:"ivan.ivic" validate:"required,min=6"`
 	Email       string `json:"email" example:"ivan@example.com" validate:"required,email"`
-	PhoneNumber string `json:"phone_number" example:"+38599111222" validate:"required,numeric"`
+	PhoneNumber string `json:"phone_number" example:"+38599111222" validate:"required"`
 	Address     string `json:"address" example:"Savska cesta 14, Zagreb" validate:"required,min=10"`
 	DateOfBirth string `json:"date_of_birth" example:"1990-05-20" validate:"required,datetime=2006-01-02"`
 	IsAdmin     bool   `json:"is_admin" example:"true"`

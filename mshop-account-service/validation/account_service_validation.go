@@ -16,41 +16,29 @@ func NewValidator() *validator.Validate {
 	return v
 }
 
-func ValidateRegistration(req models.RegistrationRequest) []string {
-	var messages []string
+func ValidateRegistration(req models.RegistrationRequest) []FieldError {
+	var errors []FieldError
 
-	if err := ValidateUser(req.User); err != nil {
-		messages = append(messages, ValidateUser(req.User)...)
+	if err := ValidateModel(req.User); err != nil {
+		errors = append(errors, ValidateModel(req.User)...)
 	}
-	if err := ValidateOrganization(req.Organization); err != nil {
-		messages = append(messages, ValidateOrganization(req.Organization)...)
+	if err := ValidateModel(req.Organization); err != nil {
+		errors = append(errors, ValidateModel(req.Organization)...)
 	}
 
-	return messages
+	return errors
 }
 
-func ValidateUser(user models.UserRegisterRequest) []string {
-	var messages []string
+func ValidateModel(model any) []FieldError {
+	var fieldErrors []FieldError
 
-	if err := validate.Struct(user); err != nil {
+	if err := validate.Struct(model); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			messages = append(messages, ValidateFormat(err).Error())
+			fieldErrors = append(fieldErrors, ValidateFormat(err))
 		}
 	}
 
-	return messages
-}
-
-func ValidateOrganization(organization models.OrganizationRegisterRequest) []string {
-	var messages []string
-
-	if err := validate.Struct(organization); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			messages = append(messages, ValidateFormat(err).Error())
-		}
-	}
-
-	return messages
+	return fieldErrors
 }
 
 func validateOIB(fl validator.FieldLevel) bool {
@@ -60,23 +48,20 @@ func validateOIB(fl validator.FieldLevel) bool {
 	return matched
 }
 
-func ValidateFormat(err validator.FieldError) error {
-	switch err.Tag() {
-	case "required":
-		return fmt.Errorf("%s is required", err.Field())
-	case "email":
-		return fmt.Errorf("%s is not a valid email", err.Field())
-	case "numeric":
-		return fmt.Errorf("%s not a valid number", err.Field())
-	case "datetime":
-		return fmt.Errorf("%s is not a valid date", err.Field())
-	case "min":
-		return fmt.Errorf("%s is too short", err.Field())
-	case "len":
-		return fmt.Errorf("%s is not the proper length", err.Field())
-	case "oib":
-		return fmt.Errorf("%s must contain exactly 11 digits", err.Field())
-	default:
-		return fmt.Errorf("%s is invalid", err.Field())
+func ValidateFormat(err validator.FieldError) FieldError {
+	tag := err.Tag()
+
+	if template, exists := ValidationMessages[tag]; exists {
+		return FieldError{
+			Field:   err.Field(),
+			Message: fmt.Sprintf(template.Message, err.Field()),
+			Reason:  template.Reason,
+		}
+	}
+
+	return FieldError{
+		Field:   err.Field(),
+		Message: fmt.Sprintf("%s failed validation rule '%s'", err.Field(), tag),
+		Reason:  "The provided value failed an unrecognized validation rule",
 	}
 }
