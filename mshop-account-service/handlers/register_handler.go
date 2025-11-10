@@ -9,6 +9,7 @@ import (
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
 	"github.com/mshop/account-service/repositories"
+	"github.com/mshop/account-service/validation"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,6 +27,16 @@ func RegisterHandler(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration payload"})
+		return
+	}
+
+	errors := validation.ValidateRegistration(req)
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, validation.ErrorResponse{
+			Code:   http.StatusBadRequest,
+			Status: "error",
+			Errors: errors,
+		})
 		return
 	}
 
