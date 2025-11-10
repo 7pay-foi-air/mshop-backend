@@ -31,13 +31,7 @@ func ValidateRegistration(req models.RegistrationRequest) []FieldError {
 }
 
 func ValidateLogin(req models.LoginRequest) []FieldError {
-	var errors []FieldError
-
-	if err := ValidateModel(req); err != nil {
-		errors = append(errors, ValidateModel(req)...)
-	}
-
-	return errors
+	return ValidateModel(req)
 }
 
 func ValidateModel(model any) []FieldError {
@@ -61,7 +55,7 @@ func validateOIB(fl validator.FieldLevel) bool {
 
 func validateTelephone(fl validator.FieldLevel) bool {
 	telephone := fl.Field().String()
-	matched, _ := regexp.MatchString(`^\+385\d{7,9}$`, telephone)
+	matched, _ := regexp.MatchString(`^\+?[0-9]{1,4}?[-.\s]?\(?[0-9]{1,3}?\)?[-.\s]?[0-9]{3,4}[-.\s]?[0-9]{3,4}$`, telephone)
 	return matched
 }
 

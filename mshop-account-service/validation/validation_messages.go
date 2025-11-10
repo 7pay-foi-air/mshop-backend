@@ -31,6 +31,6 @@ var ValidationMessages = map[string]FieldError{
 	},
 	"telephone": {
 		Message: "%s is not a valid telephone number",
-		Reason:  "The provided value does not match standard telephone number",
+		Reason:  "The provided value does not match a standard telephone number",
 	},
 }

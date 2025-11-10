@@ -17,7 +17,7 @@ type OrganizationRegisterRequest struct {
 	Name        string `json:"name" example:"mShop d.o.o." validate:"required,min=3"`
 	OIB         string `json:"oib" example:"12345678901" validate:"required,oib"`
 	Address     string `json:"address" example:"Savska cesta 123, Zagreb" validate:"required,min=10"`
-	PhoneNumber string `json:"phone_number" example:"+38515555555" validate:"required,numeric"`
+	PhoneNumber string `json:"phone_number" example:"+38515555555" validate:"required,telephone"`
 	Email       string `json:"email" example:"info@mshop.hr" validate:"required,email"`
 }
 
