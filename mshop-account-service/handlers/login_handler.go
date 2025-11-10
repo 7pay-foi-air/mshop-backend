@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mshop/account-service/models"
+	"github.com/mshop/account-service/validation"
 )
 
 // LoginHandler godoc
@@ -21,6 +22,16 @@ func LoginHandler(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid login payload"})
+		return
+	}
+
+	errors := validation.ValidateLogin(req)
+	if len(errors) > 0 {
+		c.JSON(http.StatusBadRequest, validation.ErrorResponse{
+			Code:   http.StatusBadRequest,
+			Status: "error",
+			Errors: errors,
+		})
 		return
 	}
 
