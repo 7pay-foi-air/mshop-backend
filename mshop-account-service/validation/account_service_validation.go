@@ -13,6 +13,7 @@ var validate = NewValidator()
 func NewValidator() *validator.Validate {
 	v := validator.New(validator.WithRequiredStructEnabled())
 	v.RegisterValidation("oib", validateOIB)
+	v.RegisterValidation("telephone", validateTelephone)
 	return v
 }
 
@@ -27,6 +28,10 @@ func ValidateRegistration(req models.RegistrationRequest) []FieldError {
 	}
 
 	return errors
+}
+
+func ValidateLogin(req models.LoginRequest) []FieldError {
+	return ValidateModel(req)
 }
 
 func ValidateModel(model any) []FieldError {
@@ -45,6 +50,12 @@ func validateOIB(fl validator.FieldLevel) bool {
 	oib := fl.Field().String()
 
 	matched, _ := regexp.MatchString("^[0-9]{11}$", oib)
+	return matched
+}
+
+func validateTelephone(fl validator.FieldLevel) bool {
+	telephone := fl.Field().String()
+	matched, _ := regexp.MatchString(`^\+?[0-9]{1,4}?[-.\s]?\(?[0-9]{1,3}?\)?[-.\s]?[0-9]{3,4}[-.\s]?[0-9]{3,4}$`, telephone)
 	return matched
 }
 

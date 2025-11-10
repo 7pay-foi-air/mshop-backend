@@ -29,4 +29,8 @@ var ValidationMessages = map[string]FieldError{
 		Message: "%s must contain exactly 11 digits",
 		Reason:  "OIB requires exactly 11 numeric digits",
 	},
+	"telephone": {
+		Message: "%s is not a valid telephone number",
+		Reason:  "The provided value does not match a standard telephone number",
+	},
 }
