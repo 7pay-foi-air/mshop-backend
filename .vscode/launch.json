@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    {
+      "name": "Run Account Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/mshop-account-service/cmd",
+      "env": {
+        "GIN_MODE": "debug",
+        "PORT": "8080"
+      }
+    }
+    ]
+}
