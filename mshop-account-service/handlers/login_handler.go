@@ -49,6 +49,10 @@ func LoginHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
+	if !user.IsActive {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
+		return
+	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
