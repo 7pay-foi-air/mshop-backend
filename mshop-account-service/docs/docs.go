@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/api/v1/login": {
             "post": {
-                "description": "Receives username and password, returns a success message if payload is valid",
+                "description": "Receives username/password, returns access + refresh token",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,6 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
+                "summary": "Login user",
                 "parameters": [
                     {
                         "description": "User login credentials",
@@ -50,6 +51,43 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/refresh": {
+            "post": {
+                "description": "Generate new access token using refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -107,24 +145,49 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "test123"
                 },
                 "username": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "ivan.ivic"
                 }
             }
         },
         "models.OrganizationRegisterRequest": {
             "type": "object",
+            "required": [
+                "address",
+                "email",
+                "name",
+                "oib",
+                "phone_number"
+            ],
             "properties": {
                 "address": {
                     "type": "string",
+                    "minLength": 10,
                     "example": "Savska cesta 123, Zagreb"
                 },
                 "email": {
@@ -133,6 +196,7 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
+                    "minLength": 3,
                     "example": "mShop d.o.o."
                 },
                 "oib": {
@@ -158,9 +222,19 @@ const docTemplate = `{
         },
         "models.UserRegisterRequest": {
             "type": "object",
+            "required": [
+                "address",
+                "date_of_birth",
+                "email",
+                "first_name",
+                "last_name",
+                "phone_number",
+                "username"
+            ],
             "properties": {
                 "address": {
                     "type": "string",
+                    "minLength": 10,
                     "example": "Savska cesta 14, Zagreb"
                 },
                 "date_of_birth": {
@@ -173,6 +247,7 @@ const docTemplate = `{
                 },
                 "first_name": {
                     "type": "string",
+                    "minLength": 3,
                     "example": "Ivan"
                 },
                 "is_admin": {
@@ -181,6 +256,7 @@ const docTemplate = `{
                 },
                 "last_name": {
                     "type": "string",
+                    "minLength": 3,
                     "example": "Ivić"
                 },
                 "phone_number": {
@@ -189,6 +265,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "ivan.ivic"
                 }
             }
