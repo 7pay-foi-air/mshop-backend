@@ -42,7 +42,7 @@ func LoginHandler(c *gin.Context) {
 	repo := repositories.NewLoginRepository(db.DB)
 	user, err := repo.GetUserByUsername(req.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred during login"})
 		return
 	}
 	if user == nil {
