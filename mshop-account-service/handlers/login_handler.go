@@ -4,12 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mshop/account-service/auth"
+	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
+	"github.com/mshop/account-service/repositories"
 	"github.com/mshop/account-service/validation"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // LoginHandler godoc
-// @Description Receives username and password, returns a success message if payload is valid
+// @Summary Login user
+// @Description Receives username/password, returns access + refresh token
 // @Tags Authentication
 // @Accept json
 // @Produce json
@@ -19,7 +24,6 @@ import (
 // @Router /api/v1/login [post]
 func LoginHandler(c *gin.Context) {
 	var req models.LoginRequest
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid login payload"})
 		return
@@ -35,7 +39,44 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	repo := repositories.NewLoginRepository(db.DB)
+	user, err := repo.GetUserByUsername(req.Username)
+	if err != nil || user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	if !user.IsActive {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	orgID := ""
+	if user.OrganisationUUID != nil {
+		orgID = user.OrganisationUUID.String()
+	}
+
+	accessToken, err := auth.GenerateAccessToken(user.UUID.String(), user.Role, orgID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		return
+	}
+
+	refreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful.",
+		"message":       "Login successful",
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"role":          user.Role,
 	})
 }
