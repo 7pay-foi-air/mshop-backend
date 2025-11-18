@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/mshop/account-service/auth"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
@@ -26,9 +25,6 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
-
-	secret := os.Getenv("JWT_SECRET")
-	auth.SetSecretKey(secret)
 
 	db.Init()
 
