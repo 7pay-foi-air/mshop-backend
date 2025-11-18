@@ -8,12 +8,14 @@ import (
 )
 
 var SECRET_KEY []byte
+var REFRESH_SECRET []byte
 
-func SetSecretKey(secret string) {
-	if secret == "" {
-		panic("JWT_SECRET env var is not set")
-	}
+func SetAccesSecretKey(secret string) {
 	SECRET_KEY = []byte(secret)
+}
+
+func SetRefreshSecretKey(secret string) {
+	REFRESH_SECRET = []byte(secret)
 }
 
 type Claims struct {
@@ -23,43 +25,70 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID, role, orgID string) (string, error) {
+func GenerateAccessToken(userID, role, orgID string) (string, error) {
 	claims := &Claims{
 		UserID: userID,
 		Role:   role,
 		OrgID:  orgID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	signedToken, err := token.SignedString(SECRET_KEY)
-	if err != nil {
-		return "", err
-	}
-
-	return signedToken, nil
+	return token.SignedString(SECRET_KEY)
 }
 
-func ValidateJWT(tokenStr string) (*Claims, error) {
+func GenerateRefreshToken(userID string) (string, error) {
+	claims := &jwt.RegisteredClaims{
+		Subject:   userID,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	if len(REFRESH_SECRET) > 0 {
+		return token.SignedString(REFRESH_SECRET)
+	}
+	return token.SignedString(SECRET_KEY)
+}
+
+func ValidateAccessToken(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
 		return SECRET_KEY, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid access token")
+	}
+	return claims, nil
+}
+
+func ValidateRefreshToken(tokenStr string) (string, error) {
+	parseWith := func(secret []byte) (string, error) {
+		token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return secret, nil
+		})
+		if err != nil {
+			return "", err
+		}
+		claims, ok := token.Claims.(*jwt.RegisteredClaims)
+		if !ok || !token.Valid {
+			return "", errors.New("invalid refresh token")
+		}
+		return claims.Subject, nil
 	}
 
-	return claims, nil
+	if len(REFRESH_SECRET) > 0 {
+		if sub, err := parseWith(REFRESH_SECRET); err == nil {
+			return sub, nil
+		}
+	}
+
+	return parseWith(SECRET_KEY)
 }

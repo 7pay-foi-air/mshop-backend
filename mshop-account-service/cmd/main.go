@@ -28,7 +28,8 @@ func main() {
 	}
 
 	secret := os.Getenv("JWT_SECRET")
-	auth.SetSecretKey(secret)
+	auth.SetAccesSecretKey(secret)
+	auth.SetRefreshSecretKey(secret)
 
 	db.Init()
 
@@ -42,6 +43,8 @@ func main() {
 	r.POST("api/v1/register", handlers.RegisterHandler)
 
 	r.POST("api/v1/login", handlers.LoginHandler)
+
+	r.POST("/api/v1/refresh", handlers.RefreshTokenHandler)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

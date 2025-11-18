@@ -13,7 +13,8 @@ import (
 )
 
 // LoginHandler godoc
-// @Description Receives username and password, returns a success message if payload is valid
+// @Summary Login user
+// @Description Receives username/password, returns access + refresh token
 // @Tags Authentication
 // @Accept json
 // @Produce json
@@ -23,7 +24,6 @@ import (
 // @Router /api/v1/login [post]
 func LoginHandler(c *gin.Context) {
 	var req models.LoginRequest
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid login payload"})
 		return
@@ -41,21 +41,12 @@ func LoginHandler(c *gin.Context) {
 
 	repo := repositories.NewLoginRepository(db.DB)
 	user, err := repo.GetUserByUsername(req.Username)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred during login"})
-		return
-	}
-	if user == nil {
+	if err != nil || user == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
-	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
-		return
-	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -64,15 +55,23 @@ func LoginHandler(c *gin.Context) {
 	if user.OrganisationUUID != nil {
 		orgID = user.OrganisationUUID.String()
 	}
-	token, err := auth.GenerateJWT(user.UUID.String(), user.Role, orgID)
+
+	accessToken, err := auth.GenerateAccessToken(user.UUID.String(), user.Role, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		return
+	}
+
+	refreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful",
-		"token":   token,
-		"role":    user.Role,
+		"message":       "Login successful",
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"role":          user.Role,
 	})
 }
