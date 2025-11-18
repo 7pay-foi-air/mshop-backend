@@ -31,6 +31,19 @@ services:
     volumes:
       - account-db-data:/var/lib/postgresql/data
 
+  goose-account:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    depends_on:
+      - account-db
+    volumes:
+      - ./migrations/account:/migrations
+    entrypoint: [ "goose" ]
+    working_dir: /migrations
+    networks:
+      - app-network
+
   transactions-service:
     container_name: transactions-service
     build:
@@ -63,6 +76,19 @@ services:
     volumes:
       - transactions-db-data:/var/lib/postgresql/data
 
+  goose-transactions:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    depends_on:
+      - transactions-db
+    volumes:
+      - ./migrations/transactions:/migrations
+    entrypoint: [ "goose" ]
+    working_dir: /migrations
+    networks:
+      - app-network
+
   articles-service:
     container_name: articles-service
     build:
@@ -94,6 +120,19 @@ services:
       - app-network
     volumes:
       - articles-db-data:/var/lib/postgresql/data
+
+  goose-articles:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    depends_on:
+      - articles-db
+    volumes:
+      - ./migrations/articles:/migrations
+    entrypoint: [ "goose" ]
+    working_dir: /migrations
+    networks:
+      - app-network
 
 networks:
   app-network:
