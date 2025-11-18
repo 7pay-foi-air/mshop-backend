@@ -56,7 +56,11 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := auth.GenerateJWT(user.UUID.String(), user.Role, user.OrganisationUUID.String())
+	orgID := ""
+	if user.OrganisationUUID != nil {
+		orgID = user.OrganisationUUID.String()
+	}
+	token, err := auth.GenerateJWT(user.UUID.String(), user.Role, orgID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
