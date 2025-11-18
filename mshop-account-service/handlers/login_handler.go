@@ -4,8 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mshop/account-service/auth"
+	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
+	"github.com/mshop/account-service/repositories"
 	"github.com/mshop/account-service/validation"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // LoginHandler godoc
@@ -35,7 +39,40 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	repo := repositories.NewLoginRepository(db.DB)
+	user, err := repo.GetUserByUsername(req.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred during login"})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+	if !user.IsActive {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	orgID := ""
+	if user.OrganisationUUID != nil {
+		orgID = user.OrganisationUUID.String()
+	}
+	token, err := auth.GenerateJWT(user.UUID.String(), user.Role, orgID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Login successful.",
+		"message": "Login successful",
+		"token":   token,
+		"role":    user.Role,
 	})
 }
