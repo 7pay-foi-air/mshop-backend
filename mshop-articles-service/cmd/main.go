@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/mshop/articles-service/db"
-	"github.com/mshop/articles-service/handlers"
 
 	"github.com/mshop/articles-service/docs"
 	swaggerFiles "github.com/swaggo/files"
@@ -35,7 +34,7 @@ func main() {
 		})
 	})
 
-	r.POST("api/v1/items", handlers.CreateItem)
+	//r.POST("api/v1/items", handlers.CreateItem)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
