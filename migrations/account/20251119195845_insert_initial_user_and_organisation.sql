@@ -15,8 +15,6 @@ VALUES (
            'kontakt@mshop.hr',
            '+385911234567'
        );
-
--- Dodavanje početnog korisnika koji pripada toj organizaciji
 INSERT INTO user_account (
     uuid_user,
     first_name,
