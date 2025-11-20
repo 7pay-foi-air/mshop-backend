@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -24,16 +25,16 @@ type ItemQuery struct {
 // @Failure 400 {object} map[string]string
 // @Router /api/v1/items [get]
 func GetItemsHandler(c *gin.Context) {
-	var query ItemQuery
+	raw := c.Query("uuid")
 
-	if err := c.BindQuery(&query); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
-		return
+	parts := []string{}
+	if raw != "" {
+		parts = strings.Split(raw, ",")
 	}
 
-	parsedUUIDs := make([]uuid.UUID, 0, len(query.UUIDs))
-	for _, s := range query.UUIDs {
-		id, err := uuid.Parse(s)
+	parsedUUIDs := make([]uuid.UUID, 0, len(parts))
+	for _, s := range parts {
+		id, err := uuid.Parse(strings.TrimSpace(s))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
 			return
