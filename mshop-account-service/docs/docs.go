@@ -166,7 +166,7 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6,
-                    "example": "test123"
+                    "example": "test123456"
                 },
                 "username": {
                     "type": "string",
@@ -175,52 +175,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.OrganizationRegisterRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "email",
-                "name",
-                "oib",
-                "phone_number"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "minLength": 10,
-                    "example": "Savska cesta 123, Zagreb"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "info@mshop.hr"
-                },
-                "name": {
-                    "type": "string",
-                    "minLength": 3,
-                    "example": "mShop d.o.o."
-                },
-                "oib": {
-                    "type": "string",
-                    "example": "12345678901"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+38515555555"
-                }
-            }
-        },
         "models.RegistrationRequest": {
-            "type": "object",
-            "properties": {
-                "organization": {
-                    "$ref": "#/definitions/models.OrganizationRegisterRequest"
-                },
-                "user": {
-                    "$ref": "#/definitions/models.UserRegisterRequest"
-                }
-            }
-        },
-        "models.UserRegisterRequest": {
             "type": "object",
             "required": [
                 "address",
@@ -228,6 +183,7 @@ const docTemplate = `{
                 "email",
                 "first_name",
                 "last_name",
+                "organisation_uuid",
                 "phone_number",
                 "username"
             ],
@@ -258,6 +214,10 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 3,
                     "example": "Ivić"
+                },
+                "organisation_uuid": {
+                    "type": "string",
+                    "example": "02f2c243-6c29-4f21-a98c-955372bc6297"
                 },
                 "phone_number": {
                     "type": "string",
