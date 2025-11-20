@@ -11,6 +11,17 @@
         "GIN_MODE": "debug",
         "PORT": "8080"
       }
+    },
+    {
+      "name": "Run Articles Service",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/mshop-articles-service/cmd",
+      "env": {
+        "GIN_MODE": "debug",
+        "PORT": "8082"
+      }
     }
-    ]
+  ]
 }
