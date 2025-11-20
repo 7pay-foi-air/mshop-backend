@@ -94,7 +94,7 @@
         },
         "/api/v1/register": {
             "post": {
-                "description": "Receives user and organization registration data together and returns confirmation message",
+                "description": "Receives user registration data and returns confirmation message",
                 "consumes": [
                     "application/json"
                 ],
@@ -106,7 +106,7 @@
                 ],
                 "parameters": [
                     {
-                        "description": "Combined registration payload",
+                        "description": "Registration payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
