@@ -94,7 +94,7 @@
         },
         "/api/v1/register": {
             "post": {
-                "description": "Receives user registration data and returns confirmation message",
+                "description": "Receives user and organization registration data together and returns confirmation message",
                 "consumes": [
                     "application/json"
                 ],
@@ -106,7 +106,7 @@
                 ],
                 "parameters": [
                     {
-                        "description": "Registration payload",
+                        "description": "Combined registration payload",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -169,52 +169,7 @@
                 }
             }
         },
-        "models.OrganizationRegisterRequest": {
-            "type": "object",
-            "required": [
-                "address",
-                "email",
-                "name",
-                "oib",
-                "phone_number"
-            ],
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "minLength": 10,
-                    "example": "Savska cesta 123, Zagreb"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "info@mshop.hr"
-                },
-                "name": {
-                    "type": "string",
-                    "minLength": 3,
-                    "example": "mShop d.o.o."
-                },
-                "oib": {
-                    "type": "string",
-                    "example": "12345678901"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+38515555555"
-                }
-            }
-        },
         "models.RegistrationRequest": {
-            "type": "object",
-            "properties": {
-                "organization": {
-                    "$ref": "#/definitions/models.OrganizationRegisterRequest"
-                },
-                "user": {
-                    "$ref": "#/definitions/models.UserRegisterRequest"
-                }
-            }
-        },
-        "models.UserRegisterRequest": {
             "type": "object",
             "required": [
                 "address",
@@ -222,6 +177,7 @@
                 "email",
                 "first_name",
                 "last_name",
+                "organisation_uuid",
                 "phone_number",
                 "username"
             ],
@@ -252,6 +208,10 @@
                     "type": "string",
                     "minLength": 3,
                     "example": "Ivić"
+                },
+                "organisation_uuid": {
+                    "type": "string",
+                    "example": "02f2c243-6c29-4f21-a98c-955372bc6297"
                 },
                 "phone_number": {
                     "type": "string",
