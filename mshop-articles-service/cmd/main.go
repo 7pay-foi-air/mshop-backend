@@ -38,6 +38,8 @@ func main() {
 
 	r.GET("/api/v1/items", handlers.GetItemsHandler)
 
+	r.DELETE("/api/v1/items/:uuid", handlers.DeleteItemHandler)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
