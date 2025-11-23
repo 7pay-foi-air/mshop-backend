@@ -12,6 +12,7 @@ import (
 type ItemRepository interface {
 	GetItems(ids []uuid.UUID) ([]models.ItemResponse, error)
 	CreateItem(item models.Item) (uuid.UUID, error)
+	UpdateItem(id uuid.UUID, item models.ItemUpdateRequest, imageURL *string) (int64, error)
 	DeleteItem(id uuid.UUID) (int64, error)
 }
 
@@ -59,7 +60,7 @@ func (r *itemRepository) GetItems(ids []uuid.UUID) ([]models.ItemResponse, error
 			is_active,
 			created_at,
 			updated_at
-		FROM items
+		FROM item
 		WHERE deleted_at IS NULL
 	`
 
@@ -99,7 +100,7 @@ func (r *itemRepository) GetItems(ids []uuid.UUID) ([]models.ItemResponse, error
 
 func (r *itemRepository) DeleteItem(id uuid.UUID) (int64, error) {
 	query := `
-		UPDATE items
+		UPDATE item
 		SET deleted_at = NOW()
 		WHERE uuid_item = $1
 		  AND deleted_at IS NULL
@@ -152,4 +153,42 @@ func (r *itemRepository) CreateItem(item models.Item) (uuid.UUID, error) {
 	}
 
 	return newID, nil
+}
+
+func (r *itemRepository) UpdateItem(id uuid.UUID, item models.ItemUpdateRequest, imageURL *string) (int64, error) {
+	query := `
+		UPDATE item SET
+		    name = $1,
+		    description = $2,
+		    price = $3,
+		    currency = $4,
+			sku = $5,
+		    stock_quantity = $6,
+		    image_url = COALESCE($7, image_url),
+		    updated_at = NOW()
+		WHERE uuid_item = $8
+	`
+
+	res, err := r.db.Exec(
+		query,
+		item.Name,
+		item.Description,
+		item.Price,
+		item.Currency,
+		item.SKU,
+		item.StockQuantity,
+		imageURL,
+		id,
+	)
+
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete item: %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get affected rows: %w", err)
+	}
+
+	return affected, nil
 }
