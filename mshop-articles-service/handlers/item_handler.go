@@ -202,6 +202,18 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	})
 }
 
+// UpdateItem godoc
+// @Summary Update item
+// @Description Update an item by UUID (accepts JSON data and optional image file, automatically updates the updated_at timestamp)
+// @Tags Items
+// @Param uuid path string true "Item UUID"
+// @Param data formData string true "Item data as JSON string"
+// @Param image formData file false "Optional item image"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/items/{uuid} [put]
 func (h *ItemHandler) UpdateItem(c *gin.Context) {
 	idStr := c.Param("uuid")
 
