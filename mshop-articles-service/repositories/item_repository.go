@@ -59,7 +59,7 @@ func (r *itemRepository) GetItems(ids []uuid.UUID) ([]models.ItemResponse, error
 			is_active,
 			created_at,
 			updated_at
-		FROM items
+		FROM item
 		WHERE deleted_at IS NULL
 	`
 
@@ -99,7 +99,7 @@ func (r *itemRepository) GetItems(ids []uuid.UUID) ([]models.ItemResponse, error
 
 func (r *itemRepository) DeleteItem(id uuid.UUID) (int64, error) {
 	query := `
-		UPDATE items
+		UPDATE item
 		SET deleted_at = NOW()
 		WHERE uuid_item = $1
 		  AND deleted_at IS NULL
