@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	token "github.com/mshop/articles-service/auth"
 	"github.com/mshop/articles-service/db"
@@ -199,6 +200,85 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 		"uuid_item": newID,
 		"image_url": imageURL,
 	})
+}
+
+// UpdateItem godoc
+// @Summary Update item
+// @Description Update an item by UUID (accepts JSON data and optional image file, automatically updates the updated_at timestamp)
+// @Tags Items
+// @Param uuid path string true "Item UUID"
+// @Param data formData string true "Item data as JSON string"
+// @Param image formData file false "Optional item image"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/items/{uuid} [put]
+func (h *ItemHandler) UpdateItem(c *gin.Context) {
+	idStr := c.Param("uuid")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		return
+	}
+
+	itemData := c.PostForm("data")
+	if itemData == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing item data"})
+		return
+	}
+
+	var req models.ItemUpdateRequest
+	if err := json.Unmarshal([]byte(itemData), &req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format"})
+		return
+	}
+
+	var newImageURL *string
+	file, err := c.FormFile("image")
+	if err == nil {
+		if !isValidImageType(file.Header.Get("Content-Type")) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image type. Only JPEG, PNG, and GIF are allowed"})
+			return
+		}
+
+		const maxFileSize = 5 * 1024 * 1024
+		if file.Size > maxFileSize {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Image size exceeds 5MB limit"})
+			return
+		}
+
+		ext := filepath.Ext(file.Filename)
+		filename := uuid.New().String() + ext
+		uploadPath := filepath.Join("uploads", "items", filename)
+
+		if err := os.MkdirAll(filepath.Dir(uploadPath), 0755); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory"})
+			return
+		}
+
+		if err := c.SaveUploadedFile(file, uploadPath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+			return
+		}
+
+		url := "/uploads/items/" + filename
+		newImageURL = &url
+	}
+
+	rowsAffected, err := h.itemRepo.UpdateItem(id, req, newImageURL)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully"})
 }
 
 // DeleteItem godoc

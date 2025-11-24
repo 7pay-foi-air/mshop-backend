@@ -47,6 +47,7 @@ func main() {
 	r.GET("/api/v1/items", itemHandler.GetItems)
 	r.POST("/api/v1/items", itemHandler.CreateItem)
 	r.DELETE("/api/v1/items/:uuid", itemHandler.DeleteItem)
+	r.PUT("/api/v1/items/:uuid", itemHandler.UpdateItem)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

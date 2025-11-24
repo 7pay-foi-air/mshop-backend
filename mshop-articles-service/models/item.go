@@ -31,6 +31,15 @@ type ItemCreateRequest struct {
 	StockQuantity uint64   `json:"stock_quantity"`
 }
 
+type ItemUpdateRequest struct {
+	Name          string   `json:"name"`
+	Description   string   `json:"description"`
+	Price         float64  `json:"price"`
+	Currency      Currency `json:"currency"`
+	SKU           *string  `json:"sku"`
+	StockQuantity uint64   `json:"stock_quantity"`
+}
+
 type Item struct {
 	UUIDItem         uuid.UUID
 	UUIDOrganisation uuid.UUID
