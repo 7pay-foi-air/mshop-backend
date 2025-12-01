@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mshop/account-service/auth"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
 	"github.com/mshop/account-service/repositories"
 	"github.com/mshop/account-service/validation"
+	"github.com/mshop/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 

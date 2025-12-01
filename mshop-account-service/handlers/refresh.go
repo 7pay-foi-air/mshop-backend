@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mshop/account-service/auth"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/repositories"
+	"github.com/mshop/auth"
 )
 
 type RefreshRequest struct {

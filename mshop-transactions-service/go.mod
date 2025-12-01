@@ -1,6 +1,10 @@
 module github.com/mshop/transactions-service
 
-go 1.24.2
+go 1.25.3
+
+require github.com/mshop/auth v0.0.0
+
+replace github.com/mshop/auth => ../auth
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect

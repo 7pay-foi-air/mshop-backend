@@ -7,10 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/mshop/account-service/auth"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
+	"github.com/mshop/auth"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

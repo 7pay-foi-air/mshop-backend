@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	token "github.com/mshop/articles-service/auth"
 	"github.com/mshop/articles-service/db"
 	"github.com/mshop/articles-service/docs"
 	"github.com/mshop/articles-service/handlers"
 	"github.com/mshop/articles-service/repositories"
+	"github.com/mshop/auth"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -30,8 +30,8 @@ func main() {
 
 	db.Init()
 	secret := os.Getenv("JWT_SECRET")
-	token.SetAccesSecretKey(secret)
-	token.SetRefreshSecretKey(secret)
+	auth.SetAccesSecretKey(secret)
+	auth.SetRefreshSecretKey(secret)
 
 	itemRepo := repositories.NewItemRepository(db.DB)
 	itemHandler := handlers.NewItemHandler(itemRepo)
