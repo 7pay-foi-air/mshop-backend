@@ -166,7 +166,7 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6,
-                    "example": "test123456"
+                    "example": "test123"
                 },
                 "username": {
                     "type": "string",
