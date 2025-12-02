@@ -15,7 +15,7 @@ import (
 	"github.com/mshop/articles-service/db"
 	"github.com/mshop/articles-service/models"
 	"github.com/mshop/articles-service/repositories"
-	jwt "github.com/mshop/auth"
+	token "github.com/mshop/auth"
 )
 
 type ItemQuery struct {

@@ -44,10 +44,16 @@ func main() {
 		})
 	})
 
-	r.GET("/api/v1/items", itemHandler.GetItems)
-	r.POST("/api/v1/items", itemHandler.CreateItem)
-	r.DELETE("/api/v1/items/:uuid", itemHandler.DeleteItem)
-	r.PUT("/api/v1/items/:uuid", itemHandler.UpdateItem)
+	protected := r.Group("/api/v1")
+	protected.Use(auth.RequiredAuth())
+
+	admin := protected.Group("/")
+	admin.Use(auth.RequiredAuth())
+
+	protected.GET("/items", itemHandler.GetItems)
+	admin.POST("/items", itemHandler.CreateItem)
+	admin.DELETE("/items/:uuid", itemHandler.DeleteItem)
+	admin.PUT("/items/:uuid", itemHandler.UpdateItem)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

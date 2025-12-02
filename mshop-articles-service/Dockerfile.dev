@@ -3,6 +3,10 @@ FROM golang:1.25-alpine
 WORKDIR /app
 COPY . .
 
+WORKDIR /app/mshop-articles-service
+
+COPY mshop-articles-service/cmd/.env .env
+
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o articles-service cmd/main.go
 
