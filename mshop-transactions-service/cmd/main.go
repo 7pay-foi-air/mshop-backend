@@ -7,8 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-
-	token "github.com/mshop/transactions-service/auth"
+	"github.com/mshop/auth"
 	"github.com/mshop/transactions-service/db"
 	"github.com/mshop/transactions-service/docs"
 	"github.com/mshop/transactions-service/handlers"
@@ -37,8 +36,8 @@ func main() {
 	db.Init()
 
 	secret := os.Getenv("JWT_SECRET")
-	token.SetAccesSecretKey(secret)
-	token.SetRefreshSecretKey(secret)
+	auth.SetAccesSecretKey(secret)
+	auth.SetRefreshSecretKey(secret)
 
 	repo := repositories.NewTransactionsRepository(db.DB)
 	handler := handlers.NewTransactionHandler(repo)
@@ -49,7 +48,13 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	r.POST("/api/v1/transactions", handler.CreateTransaction)
+	protected := r.Group("/api/v1")
+	protected.Use(auth.RequiredAuth())
+
+	admin := protected.Group("/")
+	admin.Use(auth.RequiredAdmin())
+
+	protected.POST("/transactions", handler.CreateTransaction)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

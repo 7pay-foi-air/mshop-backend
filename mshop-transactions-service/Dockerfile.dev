@@ -5,6 +5,8 @@ COPY . .
 
 WORKDIR /app/mshop-transactions-service
 
+COPY mshop-transactions-service/cmd/.env .env
+
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o transactions-service cmd/main.go
 

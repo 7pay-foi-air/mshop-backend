@@ -10,7 +10,10 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
+	github.com/mshop/auth v0.0.0
 )
+
+replace github.com/mshop/auth => ../auth
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect

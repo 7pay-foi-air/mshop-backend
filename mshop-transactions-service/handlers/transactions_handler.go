@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	token "github.com/mshop/transactions-service/auth"
+	"github.com/mshop/auth"
 	"github.com/mshop/transactions-service/db"
 	"github.com/mshop/transactions-service/models"
 	"github.com/mshop/transactions-service/repositories"
@@ -47,7 +47,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	claims, err := token.GetTokenClaims(c)
+	claims, err := auth.GetTokenClaims(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
