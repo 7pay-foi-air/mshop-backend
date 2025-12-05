@@ -2,8 +2,10 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -55,7 +57,18 @@ func GenerateRefreshToken(userID string) (string, error) {
 	return token.SignedString(SECRET_KEY)
 }
 
-func ValidateAccessToken(tokenStr string) (*Claims, error) {
+func ValidateAccessToken(c *gin.Context) (*Claims, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return nil, errors.New("missing Authorization header")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		return nil, errors.New("invalid Authorization header")
+	}
+
+	tokenStr := parts[1]
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return SECRET_KEY, nil
 	})
@@ -67,6 +80,10 @@ func ValidateAccessToken(tokenStr string) (*Claims, error) {
 		return nil, errors.New("invalid access token")
 	}
 	return claims, nil
+}
+
+func GetTokenClaims(c *gin.Context) (*Claims, error) {
+	return ValidateAccessToken(c)
 }
 
 func ValidateRefreshToken(tokenStr string) (string, error) {

@@ -7,10 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/mshop/account-service/auth"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
+	"github.com/mshop/auth"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -40,11 +40,17 @@ func main() {
 		})
 	})
 
-	r.POST("api/v1/register", handlers.RegisterHandler)
-
 	r.POST("api/v1/login", handlers.LoginHandler)
 
 	r.POST("/api/v1/refresh", handlers.RefreshTokenHandler)
+
+	protected := r.Group("/api/v1")
+	protected.Use(auth.RequiredAuth())
+
+	admin := protected.Group("/")
+	admin.Use(auth.RequiredAdmin())
+
+	admin.POST("/register", handlers.RegisterHandler)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

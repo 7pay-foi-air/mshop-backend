@@ -12,10 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
-	token "github.com/mshop/articles-service/auth"
 	"github.com/mshop/articles-service/db"
 	"github.com/mshop/articles-service/models"
 	"github.com/mshop/articles-service/repositories"
+	"github.com/mshop/auth"
 )
 
 type ItemQuery struct {
@@ -153,7 +153,7 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	claims, err := token.GetTokenClaims(c)
+	claims, err := auth.GetTokenClaims(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

@@ -2,8 +2,8 @@ services:
   account-service:
     container_name: account-service
     build:
-      context: ./mshop-account-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-account-service/Dockerfile.dev
     ports:
       - "8080:8080"
     environment:
@@ -54,8 +54,8 @@ services:
   transactions-service:
     container_name: transactions-service
     build:
-      context: ./mshop-transactions-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-transactions-service/Dockerfile.dev
     ports:
       - "8081:8081"
     environment:
@@ -106,8 +106,8 @@ services:
   articles-service:
     container_name: articles-service
     build:
-      context: ./mshop-articles-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-articles-service/Dockerfile.dev
     ports:
       - "8082:8082"
     environment:
