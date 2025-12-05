@@ -53,7 +53,14 @@ func RefreshTokenHandler(c *gin.Context) {
 		return
 	}
 
+	newRefreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"access_token": newAccessToken,
+		"access_token":  newAccessToken,
+		"refresh_token": newRefreshToken,
 	})
 }
