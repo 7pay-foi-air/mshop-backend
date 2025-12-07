@@ -99,3 +99,40 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		IsSuccessful:    true,
 	})
 }
+
+// GetUserTransactions godoc
+// @Summary Get user transactions
+// @Description Retrieves successful transactions for the authenticated user. Admins and owners can see all organization transactions. Supports optional date range filtering.
+// @Tags Transactions
+// @Produce json
+// @Param start_date query string false "Start date (YYYY-MM-DD format)" example(2024-01-01)
+// @Param end_date query string false "End date (YYYY-MM-DD format, inclusive)" example(2024-12-31)
+// @Success 200 {object} models.TransactionHistoryResponse
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1/transactions [get]
+func (h *TransactionHandler) GetUserTransactions(c *gin.Context) {
+	claims, err := auth.GetTokenClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := uuid.MustParse(claims.UserID)
+	orgID := uuid.MustParse(claims.OrgID)
+	role := claims.Role
+
+	isAdmin := role == "admin" || role == "owner"
+
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+
+	transactions, err := h.repo.GetUserTransactions(userID, orgID, isAdmin, startDate, endDate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, transactions)
+}
