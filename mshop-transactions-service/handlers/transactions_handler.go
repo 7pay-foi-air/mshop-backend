@@ -113,8 +113,11 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/transactions [get]
 func (h *TransactionHandler) GetUserTransactions(c *gin.Context) {
-	value, _ := c.Get("claims")
-	claims := value.(*auth.Claims)
+	claims, err := auth.GetTokenClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	userID := uuid.MustParse(claims.UserID)
 	orgID := uuid.MustParse(claims.OrgID)
