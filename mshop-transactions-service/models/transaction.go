@@ -27,3 +27,18 @@ type TransactionResponse struct {
 	Currency        string    `json:"currency"`
 	IsSuccessful    bool      `json:"is_successful"`
 }
+
+// swagger:model TransactionHistory
+type TransactionHistory struct {
+	UUIDTransaction     uuid.UUID  `json:"uuid_transaction"`
+	TotalAmount         float64    `json:"total_amount"`
+	Currency            string     `json:"currency"`
+	TransactionDate     string     `json:"transaction_date"`
+	TransactionRefundID *uuid.UUID `json:"transaction_refund_id"`
+}
+
+// swagger:model TransactionHistoryResponse
+type TransactionHistoryResponse struct {
+	SuccessfulTransactions []TransactionHistory `json:"successful_transactions"`
+	RefundedTransactions   []TransactionHistory `json:"refunded_transactions"`
+}

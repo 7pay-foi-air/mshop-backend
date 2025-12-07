@@ -55,7 +55,7 @@ func main() {
 	admin.Use(auth.RequiredAdmin())
 
 	protected.POST("/transactions", handler.CreateTransaction)
-
+	protected.GET("/transactions", handler.GetUserTransactions)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
