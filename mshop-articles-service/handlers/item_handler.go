@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/mshop/articles-service/db"
 	"github.com/mshop/articles-service/models"
 	"github.com/mshop/articles-service/repositories"
-	"github.com/mshop/auth"
 )
 
 type ItemQuery struct {
