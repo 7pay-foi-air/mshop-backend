@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/v1/items": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns all items or filters by UUIDs if provided",
                 "consumes": [
                     "application/json"
@@ -62,6 +67,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Creates a new item with optional image",
                 "consumes": [
                     "multipart/form-data"
@@ -162,6 +172,11 @@ const docTemplate = `{
         },
         "/api/v1/items/{uuid}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an item by UUID (accepts JSON data and optional image file, automatically updates the updated_at timestamp)",
                 "tags": [
                     "Items"
@@ -229,6 +244,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Soft-delete an item by UUID (sets deleted_at timestamp)",
                 "tags": [
                     "Items"

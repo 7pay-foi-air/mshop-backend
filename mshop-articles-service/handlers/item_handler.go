@@ -41,6 +41,7 @@ func NewItemHandler(itemRepo repositories.ItemRepository) *ItemHandler {
 // @Param uuid query []string false "Item UUIDs"
 // @Success 200 {array} models.ItemResponse
 // @Failure 400 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1/items [get]
 func (h *ItemHandler) GetItems(c *gin.Context) {
 	raw := c.Query("uuid")
@@ -88,6 +89,7 @@ func (h *ItemHandler) GetItems(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1/items [post]
 func (h *ItemHandler) CreateItem(c *gin.Context) {
 	name := c.PostForm("name")
@@ -213,6 +215,7 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1/items/{uuid} [put]
 func (h *ItemHandler) UpdateItem(c *gin.Context) {
 	idStr := c.Param("uuid")
@@ -290,6 +293,7 @@ func (h *ItemHandler) UpdateItem(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1/items/{uuid} [delete]
 func (h *ItemHandler) DeleteItem(c *gin.Context) {
 	idStr := c.Param("uuid")

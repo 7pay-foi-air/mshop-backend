@@ -48,7 +48,7 @@ func main() {
 	protected.Use(auth.RequiredAuth())
 
 	admin := protected.Group("/")
-	admin.Use(auth.RequiredAuth())
+	admin.Use(auth.RequiredAdmin())
 
 	protected.GET("/items", itemHandler.GetItems)
 	admin.POST("/items", itemHandler.CreateItem)

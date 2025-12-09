@@ -21,6 +21,7 @@ import (
 // @Param request body models.RegistrationRequest true "Combined registration payload"
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1/register [post]
 func RegisterHandler(c *gin.Context) {
 	var req models.RegistrationRequest
