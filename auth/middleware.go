@@ -34,7 +34,7 @@ func RequiredAdmin() gin.HandlerFunc {
 
 		claims := value.(*Claims)
 
-		if claims.Role != "admin" && claims.Role != "owner" {
+		if claims.Role == "cashier" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "admin only"})
 			c.Abort()
 			return

@@ -41,6 +41,32 @@ VALUES (
            'owner',
            '02f2c243-6c29-4f21-a98c-955372bc6297'
        );
+INSERT INTO user_account (
+    uuid_user,
+    first_name,
+    last_name,
+    username,
+    email,
+    phone_number,
+    date_of_birth,
+    address,
+    password_hash,
+    role,
+    uuid_organisation
+)
+VALUES (
+           '209c27af-1034-4061-8920-d9924bfa858f',
+           'Marko',
+           'Markic',
+           'mmarkic7',
+           'mmarkic@gmail.com',
+           '+385932234566',
+           '1995-03-22',
+           'Istarska Ulica 5, Zagreb',
+           '$2a$12$A.5I9VWyQXX9jHRQIVAVEeyGSRhiAZn3oXMh8Vws6V7mHVnMHNAai',
+           'cashier',
+           '02f2c243-6c29-4f21-a98c-955372bc6297'
+       );
 
 -- +goose Down
 DELETE FROM user_account
