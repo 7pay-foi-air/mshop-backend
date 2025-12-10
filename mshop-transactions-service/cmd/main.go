@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/mshop/auth"
 	"github.com/mshop/transactions-service/db"
 	"github.com/mshop/transactions-service/docs"
 	"github.com/mshop/transactions-service/handlers"

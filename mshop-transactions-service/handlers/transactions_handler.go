@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/mshop/auth"
+	"github.com/7pay-foi-air/auth"
 	"github.com/mshop/transactions-service/db"
 	"github.com/mshop/transactions-service/models"
 	"github.com/mshop/transactions-service/repositories"

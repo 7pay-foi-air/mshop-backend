@@ -1,3 +1,5 @@
+github.com/7pay-foi-air/auth v0.0.0 h1:0RxABHWQMwNSa60J69wAfFrPJvPJnWm4VK4LfW7bh4E=
+github.com/7pay-foi-air/auth v0.0.0/go.mod h1:Ffv6Ikca5+/2HBVhxpvm9nwwKx5Nhada4vJ46PtHZgY=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/PuerkitoBio/purell v1.1.1 h1:WEQqlqaGbrPkxLJWfBwQmfEAE1Z7ONdDLqrN38tNFfI=

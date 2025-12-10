@@ -3,10 +3,10 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/repositories"
-	"github.com/mshop/auth"
 )
 
 type RefreshRequest struct {

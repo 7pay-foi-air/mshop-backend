@@ -3,12 +3,12 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/models"
 	"github.com/mshop/account-service/repositories"
 	"github.com/mshop/account-service/validation"
-	"github.com/mshop/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -3,16 +3,14 @@ module github.com/mshop/articles-service
 go 1.25.3
 
 require (
+	github.com/7pay-foi-air/auth v0.0.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
-	github.com/mshop/auth v0.0.0
 	github.com/swaggo/swag v1.16.6
 )
 
 require github.com/golang-jwt/jwt/v5 v5.3.0 // indirect
-
-replace github.com/mshop/auth => ../auth
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect

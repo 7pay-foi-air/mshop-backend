@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/mshop/articles-service/db"
 	"github.com/mshop/articles-service/docs"
 	"github.com/mshop/articles-service/handlers"
 	"github.com/mshop/articles-service/repositories"
-	"github.com/mshop/auth"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -48,7 +48,7 @@ func main() {
 	protected.Use(auth.RequiredAuth())
 
 	admin := protected.Group("/")
-	admin.Use(auth.RequiredAuth())
+	admin.Use(auth.RequiredAdmin())
 
 	protected.GET("/items", itemHandler.GetItems)
 	admin.POST("/items", itemHandler.CreateItem)

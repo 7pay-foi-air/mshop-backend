@@ -100,6 +100,11 @@ const docTemplate = `{
         },
         "/api/v1/register": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Receives user and organization registration data together and returns confirmation message",
                 "consumes": [
                     "application/json"
