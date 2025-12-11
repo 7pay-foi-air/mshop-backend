@@ -43,7 +43,7 @@ func main() {
 			"status": "ok",
 		})
 	})
-
+	r.Static("/uploads", "./uploads")
 	protected := r.Group("/api/v1")
 	protected.Use(auth.RequiredAuth())
 
