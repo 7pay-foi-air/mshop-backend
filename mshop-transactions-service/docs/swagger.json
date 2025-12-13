@@ -1,0 +1,243 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API documentation for the transactions service",
+        "title": "Transactions Service API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8081",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/transactions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves successful transactions for the authenticated user. Admins and owners can see all organization transactions. Supports optional date range filtering.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get user transactions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "2024-01-01",
+                        "description": "Start date (YYYY-MM-DD format)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "2024-12-31",
+                        "description": "End date (YYYY-MM-DD format, inclusive)",
+                        "name": "end_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TransactionHistoryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a purchase transaction with items",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create a new transaction",
+                "parameters": [
+                    {
+                        "description": "Transaction data",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.TransactionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.CreateTransactionRequest": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "example": "EUR"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Kupnja USB-C kabela"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionItemRequest"
+                    }
+                },
+                "payment_method": {
+                    "type": "string",
+                    "example": "credit_card"
+                }
+            }
+        },
+        "models.TransactionHistory": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "transaction_date": {
+                    "type": "string"
+                },
+                "transaction_refund_id": {
+                    "type": "string"
+                },
+                "uuid_transaction": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TransactionHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "refunded_transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionHistory"
+                    }
+                },
+                "successful_transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionHistory"
+                    }
+                }
+            }
+        },
+        "models.TransactionItemRequest": {
+            "type": "object",
+            "properties": {
+                "item_name": {
+                    "type": "string",
+                    "example": "Premium USB-C Kabel 1m"
+                },
+                "item_price": {
+                    "type": "number",
+                    "example": 9.99
+                },
+                "quantity": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "uuid_item": {
+                    "type": "string",
+                    "example": "7c0d9f7a-b48e-4bb9-a8f3-4946b278c321"
+                }
+            }
+        },
+        "models.TransactionResponse": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "is_successful": {
+                    "type": "boolean"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "uuid_transaction": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

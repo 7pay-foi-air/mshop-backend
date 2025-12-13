@@ -3,9 +3,11 @@ FROM golang:1.25-alpine AS builder
 WORKDIR /app
 
 COPY go.mod go.sum ./
-RUN go mod download
+COPY mshop-account-service ./mshop-account-service
 
-COPY . .
+WORKDIR /app/mshop-account-service
+
+RUN go mod download
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o account-service cmd/main.go
 
@@ -15,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
-COPY --from=builder /app/account-service .
+COPY --from=builder /app/mshop-account-service/account-service .
 
 EXPOSE 8080
 

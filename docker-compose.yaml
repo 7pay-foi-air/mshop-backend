@@ -2,8 +2,8 @@ services:
   account-service:
     container_name: account-service
     build:
-      context: ./mshop-account-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-account-service/Dockerfile.dev
     ports:
       - "8080:8080"
     environment:
@@ -19,6 +19,11 @@ services:
 
   account-db:
     image: postgres:15
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d account_db -U user" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     container_name: account-db
     environment:
       POSTGRES_DB: account_db
@@ -31,11 +36,26 @@ services:
     volumes:
       - account-db-data:/var/lib/postgresql/data
 
+  goose-account:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    command: ["up"]
+    depends_on:
+      account-db:
+        condition: service_healthy
+    volumes:
+      - ./migrations/account:/migrations
+    entrypoint: ["goose", "postgres", "postgres://user:password@account-db:5432/account_db?sslmode=disable"]
+    working_dir: /migrations
+    networks:
+      - app-network
+
   transactions-service:
     container_name: transactions-service
     build:
-      context: ./mshop-transactions-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-transactions-service/Dockerfile.dev
     ports:
       - "8081:8081"
     environment:
@@ -51,6 +71,11 @@ services:
 
   transactions-db:
     image: postgres:15
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d transactions_db -U user" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     container_name: transactions-db
     environment:
       POSTGRES_DB: transactions_db
@@ -63,11 +88,26 @@ services:
     volumes:
       - transactions-db-data:/var/lib/postgresql/data
 
+  goose-transactions:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    command: ["up"]
+    depends_on:
+      transactions-db:
+        condition: service_healthy
+    volumes:
+      - ./migrations/transactions:/migrations
+    entrypoint: ["goose", "postgres", "postgres://user:password@transactions-db:5432/transactions_db?sslmode=disable"]
+    working_dir: /migrations
+    networks:
+      - app-network
+
   articles-service:
     container_name: articles-service
     build:
-      context: ./mshop-articles-service
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: mshop-articles-service/Dockerfile.dev
     ports:
       - "8082:8082"
     environment:
@@ -83,6 +123,11 @@ services:
 
   articles-db:
     image: postgres:15
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d articles_db -U user" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
     container_name: articles-db
     environment:
       POSTGRES_DB: articles_db
@@ -94,6 +139,21 @@ services:
       - app-network
     volumes:
       - articles-db-data:/var/lib/postgresql/data
+
+  goose-articles:
+    build:
+      context: .
+      dockerfile: goose/Dockerfile
+    command: ["up"]
+    depends_on:
+      articles-db:
+        condition: service_healthy
+    volumes:
+      - ./migrations/articles:/migrations
+    entrypoint: ["goose", "postgres", "postgres://user:password@articles-db:5432/articles_db?sslmode=disable"]
+    working_dir: /migrations
+    networks:
+      - app-network
 
 networks:
   app-network:

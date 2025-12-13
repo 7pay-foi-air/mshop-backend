@@ -20,13 +20,9 @@ func NewValidator() *validator.Validate {
 func ValidateRegistration(req models.RegistrationRequest) []FieldError {
 	var errors []FieldError
 
-	if err := ValidateModel(req.User); err != nil {
-		errors = append(errors, ValidateModel(req.User)...)
+	if err := ValidateModel(req); err != nil {
+		errors = append(errors, ValidateModel(req)...)
 	}
-	if err := ValidateModel(req.Organization); err != nil {
-		errors = append(errors, ValidateModel(req.Organization)...)
-	}
-
 	return errors
 }
 

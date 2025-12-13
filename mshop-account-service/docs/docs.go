@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/api/v1/login": {
             "post": {
-                "description": "Receives username and password, returns a success message if payload is valid",
+                "description": "Receives username/password, returns access + refresh token",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,6 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
+                "summary": "Login user",
                 "parameters": [
                     {
                         "description": "User login credentials",
@@ -60,8 +61,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/refresh": {
+            "post": {
+                "description": "Generate new access token using refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/register": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Receives user and organization registration data together and returns confirmation message",
                 "consumes": [
                     "application/json"
@@ -107,60 +150,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.RefreshRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "test123"
                 },
                 "username": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "ivan.ivic"
-                }
-            }
-        },
-        "models.OrganizationRegisterRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "Savska cesta 123, Zagreb"
-                },
-                "email": {
-                    "type": "string",
-                    "example": "info@mshop.hr"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "mShop d.o.o."
-                },
-                "oib": {
-                    "type": "string",
-                    "example": "12345678901"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "example": "+38515555555"
                 }
             }
         },
         "models.RegistrationRequest": {
             "type": "object",
-            "properties": {
-                "organization": {
-                    "$ref": "#/definitions/models.OrganizationRegisterRequest"
-                },
-                "user": {
-                    "$ref": "#/definitions/models.UserRegisterRequest"
-                }
-            }
-        },
-        "models.UserRegisterRequest": {
-            "type": "object",
+            "required": [
+                "address",
+                "date_of_birth",
+                "email",
+                "first_name",
+                "last_name",
+                "organisation_uuid",
+                "phone_number",
+                "username"
+            ],
             "properties": {
                 "address": {
                     "type": "string",
+                    "minLength": 10,
                     "example": "Savska cesta 14, Zagreb"
                 },
                 "date_of_birth": {
@@ -173,6 +208,7 @@ const docTemplate = `{
                 },
                 "first_name": {
                     "type": "string",
+                    "minLength": 3,
                     "example": "Ivan"
                 },
                 "is_admin": {
@@ -181,7 +217,12 @@ const docTemplate = `{
                 },
                 "last_name": {
                     "type": "string",
+                    "minLength": 3,
                     "example": "Ivić"
+                },
+                "organisation_uuid": {
+                    "type": "string",
+                    "example": "02f2c243-6c29-4f21-a98c-955372bc6297"
                 },
                 "phone_number": {
                     "type": "string",
@@ -189,6 +230,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
+                    "minLength": 6,
                     "example": "ivan.ivic"
                 }
             }
