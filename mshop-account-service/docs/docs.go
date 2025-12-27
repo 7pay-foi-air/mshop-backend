@@ -263,12 +263,12 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 10,
-                    "example": "test123"
+                    "example": "password123"
                 },
                 "username": {
                     "type": "string",
                     "minLength": 6,
-                    "example": "ivan.ivic"
+                    "example": "iivanic7"
                 }
             }
         },
