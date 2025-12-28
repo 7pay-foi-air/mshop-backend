@@ -52,7 +52,17 @@ func RegisterHandler(c *gin.Context) {
 
 	userUUID := uuid.New()
 	dateOfBirth, _ := time.Parse("2006-01-02", req.DateOfBirth)
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("test123"), bcrypt.DefaultCost)
+	plainPassword := GenerateRandomPassword(10)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(plainPassword),
+		bcrypt.DefaultCost,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
 
 	if err := repo.CreateUser(tx, userUUID, req, string(hashedPassword), dateOfBirth); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -63,6 +73,12 @@ func RegisterHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
 		return
 	}
+
+	_ = SendRegistrationEmail(
+		req.Email,
+		req.Username,
+		plainPassword,
+	)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Registration successfull",

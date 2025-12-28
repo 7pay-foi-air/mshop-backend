@@ -22,6 +22,9 @@ import (
 // @host localhost:8080
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
@@ -46,6 +49,8 @@ func main() {
 
 	protected := r.Group("/api/v1")
 	protected.Use(auth.RequiredAuth())
+
+	protected.POST("/password/change", handlers.ChangePasswordHandler)
 
 	admin := protected.Group("/")
 	admin.Use(auth.RequiredAdmin())

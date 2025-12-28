@@ -37,3 +37,35 @@ func (r *RegistrationRepository) CreateUser(tx *sql.Tx, userUUID uuid.UUID, user
 	)
 	return err
 }
+
+func (r *RegistrationRepository) SetRecoveryToken(
+	userID uuid.UUID,
+	recoveryHash string,
+) error {
+	_, err := r.db.Exec(`
+		UPDATE user_account
+		SET
+			recovery_token_hash = $1,
+			updated_at = now()
+		WHERE uuid_user = $2
+		  AND deleted_at IS NULL
+	`, recoveryHash, userID)
+
+	return err
+}
+
+func (r *RegistrationRepository) ChangePasswordWithRecovery(
+	userID uuid.UUID,
+	newPasswordHash string,
+) error {
+	_, err := r.db.Exec(`
+		UPDATE user_account
+		SET
+			password_hash = $1,
+			updated_at = now()
+		WHERE uuid_user = $2
+		  AND deleted_at IS NULL
+	`, newPasswordHash, userID)
+
+	return err
+}
