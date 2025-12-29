@@ -37,7 +37,7 @@ VALUES (
            '+385911234568',
            '1990-01-01',
            'Ilica 1, Zagreb',
-           '$2a$12$dJcfMG7QNfeZ0.JnDBwABuD0kuyXwJViLIaUPftrJUpMCimWgTsDa',
+           '$2a$12$YUkWaSSHSvo9Lj/Yj8LQxekvgugpHar.d/RZqjnDHXeeuK.liB1Me',
            'owner',
            '02f2c243-6c29-4f21-a98c-955372bc6297'
        );
@@ -63,7 +63,7 @@ VALUES (
            '+385932234566',
            '1995-03-22',
            'Istarska Ulica 5, Zagreb',
-           '$2a$12$A.5I9VWyQXX9jHRQIVAVEeyGSRhiAZn3oXMh8Vws6V7mHVnMHNAai',
+           '$2a$12$p/pHbqPtWursmfDa0W2LuOZSeGXUQo7MfcmAUG2pWzXL5WlC1zrIC',
            'cashier',
            '02f2c243-6c29-4f21-a98c-955372bc6297'
        );
