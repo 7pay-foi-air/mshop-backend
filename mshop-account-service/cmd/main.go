@@ -11,6 +11,7 @@ import (
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
+	"github.com/mshop/account-service/repositories"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -36,6 +37,9 @@ func main() {
 
 	db.Init()
 
+	userRepo := repositories.NewUserRepository(db.DB)
+	userHandler := handlers.NewUserHandler(userRepo)
+
 	r := gin.Default()
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -55,6 +59,7 @@ func main() {
 	admin := protected.Group("/")
 	admin.Use(auth.RequiredAdmin())
 
+	protected.GET("/users", userHandler.GetUsers)
 	admin.POST("/register", handlers.RegisterHandler)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

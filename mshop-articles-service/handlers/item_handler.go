@@ -99,7 +99,7 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	sku := c.PostForm("sku")
 	stockQuantityStr := c.PostForm("stock_quantity")
 
-	if name == "" || description == "" || priceStr == "" || currency == "" || stockQuantityStr == "" {
+	if name == "" || priceStr == "" || currency == "" || stockQuantityStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
 		return
 	}
