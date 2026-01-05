@@ -24,9 +24,9 @@ Dobrodošli!
 Vaš korisnički račun je uspješno kreiran.
 
 Korisničko ime: %s
-Lozinka: %s
+Inicijalna lozinka: %s
 
-Preporučujemo da lozinku promijenite nakon prve prijave.
+Preporučujemo da inicijalnu lozinku promijenite nakon prve prijave.
 
 Lijep pozdrav,
 Account Service mShop
