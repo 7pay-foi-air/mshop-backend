@@ -3,6 +3,8 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -11,8 +13,9 @@ import (
 
 type UserRepository interface {
 	GetUsers(ids []uuid.UUID) ([]models.UserDB, error)
-	//UpdateUser()
-	//DeleteUser()
+	GetUserByID(id uuid.UUID) (*models.UserDB, error)
+	UpdateUser(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error)
+	UpdateUserByAdmin(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error)
 }
 
 type userRepository struct {
@@ -27,6 +30,27 @@ func scanUser(rows *sql.Rows) (models.UserDB, error) {
 	var user models.UserDB
 
 	err := rows.Scan(
+		&user.UUID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Username,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.DateOfBirth,
+		&user.Address,
+		&user.Role,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	return user, err
+}
+
+func scanUserRow(row *sql.Row) (models.UserDB, error) {
+	var user models.UserDB
+
+	err := row.Scan(
 		&user.UUID,
 		&user.FirstName,
 		&user.LastName,
@@ -95,4 +119,171 @@ func (r *userRepository) GetUsers(ids []uuid.UUID) ([]models.UserDB, error) {
 	}
 
 	return users, nil
+}
+
+func (r *userRepository) GetUserByID(id uuid.UUID) (*models.UserDB, error) {
+	query := `
+		SELECT 
+			uuid_user,
+			first_name,
+			last_name,
+			username,
+			email,
+			phone_number,
+			date_of_birth,
+			address,
+			role,
+			is_active,
+			created_at,
+			updated_at
+		FROM user_account
+		WHERE uuid_user = $1 AND deleted_at IS NULL
+	`
+
+	row := r.db.QueryRow(query, id)
+	user, err := scanUserRow(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to fetch user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) UpdateUser(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error) {
+	_, err := r.GetUserByID(userUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	allowedFields := map[string]bool{
+		"first_name":    true,
+		"last_name":     true,
+		"date_of_birth": true,
+		"phone_number":  true,
+		"address":       true,
+	}
+
+	setClauses := []string{}
+	args := []interface{}{}
+	paramCount := 1
+
+	for field, value := range updates {
+		if !allowedFields[field] {
+			continue
+		}
+
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", field, paramCount))
+		args = append(args, value)
+		paramCount++
+	}
+
+	if len(setClauses) == 0 {
+		return nil, fmt.Errorf("no valid fields to update")
+	}
+
+	setClauses = append(setClauses, fmt.Sprintf("updated_at = $%d", paramCount))
+	args = append(args, time.Now())
+	paramCount++
+
+	args = append(args, userUUID)
+
+	query := fmt.Sprintf(`
+		UPDATE user_account
+		SET %s
+		WHERE uuid_user = $%d AND deleted_at IS NULL
+	`, strings.Join(setClauses, ", "), paramCount)
+
+	result, err := r.db.Exec(query, args...)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				return nil, fmt.Errorf("duplicate value: %s", pqErr.Constraint)
+			}
+		}
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("user not found or already deleted")
+	}
+
+	return r.GetUserByID(userUUID)
+}
+
+func (r *userRepository) UpdateUserByAdmin(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error) {
+	_, err := r.GetUserByID(userUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	allowedFields := map[string]bool{
+		"first_name":    true,
+		"last_name":     true,
+		"date_of_birth": true,
+		"phone_number":  true,
+		"address":       true,
+		"email":         true,
+		"username":      true,
+		"role":          true,
+		"is_active":     true,
+	}
+
+	setClauses := []string{}
+	args := []interface{}{}
+	paramCount := 1
+
+	for field, value := range updates {
+		if !allowedFields[field] {
+			continue
+		}
+
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", field, paramCount))
+		args = append(args, value)
+		paramCount++
+	}
+
+	if len(setClauses) == 0 {
+		return nil, fmt.Errorf("no valid fields to update")
+	}
+
+	setClauses = append(setClauses, fmt.Sprintf("updated_at = $%d", paramCount))
+	args = append(args, time.Now())
+	paramCount++
+
+	args = append(args, userUUID)
+
+	query := fmt.Sprintf(`
+		UPDATE user_account
+		SET %s
+		WHERE uuid_user = $%d AND deleted_at IS NULL
+	`, strings.Join(setClauses, ", "), paramCount)
+
+	result, err := r.db.Exec(query, args...)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				return nil, fmt.Errorf("duplicate value: %s", pqErr.Constraint)
+			}
+		}
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return nil, fmt.Errorf("user not found or already deleted")
+	}
+
+	return r.GetUserByID(userUUID)
 }
