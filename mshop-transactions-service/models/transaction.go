@@ -35,10 +35,18 @@ type TransactionHistory struct {
 	Currency            string     `json:"currency"`
 	TransactionDate     string     `json:"transaction_date"`
 	TransactionRefundID *uuid.UUID `json:"transaction_refund_id"`
+	PaymentMethod       string     `json:"payment_method"`
+	UUIDOrganisation    uuid.UUID  `json:"uuid_organisation"`
 }
 
 // swagger:model TransactionHistoryResponse
 type TransactionHistoryResponse struct {
 	SuccessfulTransactions []TransactionHistory `json:"successful_transactions"`
 	RefundedTransactions   []TransactionHistory `json:"refunded_transactions"`
+}
+
+// swagger:model RefundTransactionRequest
+type RefundTransactionRequest struct {
+	UUIDTransaction uuid.UUID `json:"uuid_transaction" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Description     string    `json:"description" example:"Customer requested refund"`
 }

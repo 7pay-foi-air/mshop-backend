@@ -14,6 +14,9 @@ type TransactionsRepository interface {
 	InsertTransactionItem(tx *sql.Tx, item models.TransactionItemRequest, txID uuid.UUID) (float64, error)
 	FinalizeTransaction(tx *sql.Tx, txID uuid.UUID, total float64) error
 	GetUserTransactions(userID uuid.UUID, orgID uuid.UUID, isAdmin bool, startDate, endDate string) (models.TransactionHistoryResponse, error)
+
+	GetTransactionByID(txID uuid.UUID) (models.TransactionHistory, error)
+	CreateRefundTransaction(tx *sql.Tx, original models.TransactionHistory, user uuid.UUID, description string) (uuid.UUID, error)
 }
 
 type transactionsRepository struct {
@@ -198,4 +201,62 @@ func (r *transactionsRepository) categorizeTransactions(transactions []models.Tr
 	}
 
 	return successful, refunded
+}
+
+func (r *transactionsRepository) GetTransactionByID(txID uuid.UUID) (models.TransactionHistory, error) {
+	var t models.TransactionHistory
+
+	err := r.db.QueryRow(`
+		SELECT uuid_transaction, total_amount, currency, created_at, uuid_refund_to_transaction, payment_method, uuid_organisation
+		FROM transaction
+		WHERE uuid_transaction = $1 AND is_successful = true
+	`, txID).Scan(
+		&t.UUIDTransaction,
+		&t.TotalAmount,
+		&t.Currency,
+		&t.TransactionDate,
+		&t.TransactionRefundID,
+		&t.PaymentMethod,
+		&t.UUIDOrganisation,
+	)
+
+	return t, err
+}
+
+func (r *transactionsRepository) CreateRefundTransaction(
+	tx *sql.Tx,
+	original models.TransactionHistory,
+	user uuid.UUID,
+	description string,
+) (uuid.UUID, error) {
+
+	var refundID uuid.UUID
+
+	err := tx.QueryRow(`
+	INSERT INTO transaction (
+		total_amount,
+		currency,
+		payment_method,
+		is_successful,
+		transaction_type,
+		description,
+		uuid_refund_to_transaction,
+		uuid_user,
+		uuid_organisation,
+		completed_at
+	)
+	VALUES ($1, $2, $3, true, 'Refund', $4, $5, $6, $7, NOW()
+	)
+	RETURNING uuid_transaction
+`,
+		original.TotalAmount,
+		original.Currency,
+		original.PaymentMethod,
+		description,
+		original.UUIDTransaction,
+		user,
+		original.UUIDOrganisation,
+	).Scan(&refundID)
+
+	return refundID, err
 }
