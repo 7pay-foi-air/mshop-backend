@@ -56,7 +56,10 @@ func main() {
 
 	protected.POST("/transactions", handler.CreateTransaction)
 	protected.GET("/transactions", handler.GetUserTransactions)
+	protected.GET("/transactions/:id", handler.GetTransactionDetails)
+
 	admin.POST("/transactions/refund", handler.RefundTransaction)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
