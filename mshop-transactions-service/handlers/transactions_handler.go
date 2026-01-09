@@ -176,13 +176,11 @@ func (h *TransactionHandler) GetTransactionDetails(c *gin.Context) {
 		return
 	}
 
-	// security: mora biti ista organizacija
 	if header.UUIDOrganisation != orgID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
 	}
 
-	// ako nije admin/owner, mora biti vlasnik transakcije
 	if !isAdmin && header.UUIDUser != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
 		return
