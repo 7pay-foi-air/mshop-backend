@@ -136,3 +136,68 @@ func (h *TransactionHandler) GetUserTransactions(c *gin.Context) {
 
 	c.JSON(http.StatusOK, transactions)
 }
+
+// GetTransactionDetails godoc
+// @Summary Get transaction details
+// @Description Returns transaction basic info + items (items can be empty)
+// @Tags Transactions
+// @Produce json
+// @Param id path string true "Transaction UUID"
+// @Success 200 {object} models.TransactionDetailsResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1/transactions/{id} [get]
+func (h *TransactionHandler) GetTransactionDetails(c *gin.Context) {
+	idStr := c.Param("id")
+	txID, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		return
+	}
+
+	claims, err := auth.GetTokenClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	orgID := uuid.MustParse(claims.OrgID)
+	userID := uuid.MustParse(claims.UserID)
+	role := claims.Role
+	isAdmin := role == "admin" || role == "owner"
+
+	header, err := h.repo.GetTransactionByID(txID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
+		return
+	}
+
+	if header.UUIDOrganisation != orgID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		return
+	}
+
+	if !isAdmin && header.UUIDUser != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Forbidden"})
+		return
+	}
+
+	items, err := h.repo.GetTransactionItems(txID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch items"})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.TransactionDetailsResponse{
+		UUIDTransaction: header.UUIDTransaction,
+		TransactionType: header.TransactionType,
+		TotalAmount:     header.TotalAmount,
+		Currency:        header.Currency,
+		TransactionDate: header.TransactionDate,
+		Items:           items,
+	})
+}

@@ -206,6 +206,85 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/transactions/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns transaction basic info + items (items can be empty)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get transaction details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Transaction UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TransactionDetailsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -245,10 +324,47 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TransactionDetailsResponse": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionItemDetail"
+                    }
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                },
+                "transaction_date": {
+                    "description": "created_at",
+                    "type": "string"
+                },
+                "transaction_refund_id": {
+                    "type": "string"
+                },
+                "transaction_type": {
+                    "description": "Purchase / Refund",
+                    "type": "string"
+                },
+                "uuid_transaction": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TransactionHistory": {
             "type": "object",
             "properties": {
                 "currency": {
+                    "type": "string"
+                },
+                "payment_method": {
                     "type": "string"
                 },
                 "total_amount": {
@@ -260,7 +376,16 @@ const docTemplate = `{
                 "transaction_refund_id": {
                     "type": "string"
                 },
+                "transaction_type": {
+                    "type": "string"
+                },
+                "uuid_organisation": {
+                    "type": "string"
+                },
                 "uuid_transaction": {
+                    "type": "string"
+                },
+                "uuid_user": {
                     "type": "string"
                 }
             }
@@ -279,6 +404,26 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.TransactionHistory"
                     }
+                }
+            }
+        },
+        "models.TransactionItemDetail": {
+            "type": "object",
+            "properties": {
+                "item_name": {
+                    "type": "string"
+                },
+                "item_price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "subtotal": {
+                    "type": "number"
+                },
+                "uuid_item": {
+                    "type": "string"
                 }
             }
         },

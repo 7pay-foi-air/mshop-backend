@@ -17,6 +17,7 @@ type TransactionsRepository interface {
 
 	GetTransactionByID(txID uuid.UUID) (models.TransactionHistory, error)
 	CreateRefundTransaction(tx *sql.Tx, original models.TransactionHistory, user uuid.UUID, description string) (uuid.UUID, error)
+	GetTransactionItems(txID uuid.UUID) ([]models.TransactionItemDetail, error)
 }
 
 type transactionsRepository struct {
@@ -207,7 +208,9 @@ func (r *transactionsRepository) GetTransactionByID(txID uuid.UUID) (models.Tran
 	var t models.TransactionHistory
 
 	err := r.db.QueryRow(`
-		SELECT uuid_transaction, total_amount, currency, created_at, uuid_refund_to_transaction, payment_method, uuid_organisation
+		SELECT uuid_transaction, total_amount, currency, created_at,
+		       uuid_refund_to_transaction, payment_method, uuid_organisation,
+		       transaction_type, uuid_user
 		FROM transaction
 		WHERE uuid_transaction = $1 AND is_successful = true
 	`, txID).Scan(
@@ -218,6 +221,8 @@ func (r *transactionsRepository) GetTransactionByID(txID uuid.UUID) (models.Tran
 		&t.TransactionRefundID,
 		&t.PaymentMethod,
 		&t.UUIDOrganisation,
+		&t.TransactionType,
+		&t.UUIDUser,
 	)
 
 	return t, err
@@ -259,4 +264,33 @@ func (r *transactionsRepository) CreateRefundTransaction(
 	).Scan(&refundID)
 
 	return refundID, err
+}
+
+func (r *transactionsRepository) GetTransactionItems(txID uuid.UUID) ([]models.TransactionItemDetail, error) {
+	rows, err := r.db.Query(`
+		SELECT uuid_item, item_name, item_price, quantity, subtotal
+		FROM transaction_item
+		WHERE uuid_transaction = $1
+		ORDER BY item_name
+	`, txID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query transaction items: %w", err)
+	}
+	defer rows.Close()
+
+	items := []models.TransactionItemDetail{}
+
+	for rows.Next() {
+		var it models.TransactionItemDetail
+		if err := rows.Scan(&it.UUIDItem, &it.ItemName, &it.ItemPrice, &it.Quantity, &it.Subtotal); err != nil {
+			return nil, fmt.Errorf("failed to scan transaction item: %w", err)
+		}
+		items = append(items, it)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return items, nil
 }
