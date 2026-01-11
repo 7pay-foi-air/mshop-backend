@@ -164,6 +164,7 @@ func (r *userRepository) UpdateUser(userUUID uuid.UUID, updates map[string]inter
 		"date_of_birth": true,
 		"phone_number":  true,
 		"address":       true,
+		"email":         true,
 	}
 
 	setClauses := []string{}
@@ -234,6 +235,7 @@ func (r *userRepository) UpdateUserByAdmin(userUUID uuid.UUID, updates map[strin
 		"username":      true,
 		"role":          true,
 		"is_active":     true,
+		"is_admin":      true,
 	}
 
 	setClauses := []string{}

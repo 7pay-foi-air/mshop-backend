@@ -63,14 +63,11 @@ func main() {
 	admin := protected.Group("/")
 	admin.Use(auth.RequiredAdmin())
 	{
-		// User registration
 		admin.POST("/register", handlers.RegisterHandler)
 
-		// Admin user management
 		admin.PATCH("/users/:userId", userHandler.UpdateUserByAdmin)
 	}
 
-	// Swagger documentation
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")

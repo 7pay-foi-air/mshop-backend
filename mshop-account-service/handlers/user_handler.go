@@ -95,6 +95,9 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	if req.FirstName != nil {
 		updates["first_name"] = *req.FirstName
 	}
+	if req.Email != nil {
+		updates["email"] = *req.Email
+	}
 	if req.LastName != nil {
 		updates["last_name"] = *req.LastName
 	}
@@ -206,7 +209,9 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	if req.IsActive != nil {
 		updates["is_active"] = *req.IsActive
 	}
-
+	if req.IsAdmin != nil {
+		updates["is_admin"] = *req.IsAdmin
+	}
 	if len(updates) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
 		return
