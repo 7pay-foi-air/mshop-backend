@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/7pay-foi-air/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mshop/account-service/models"
@@ -78,8 +79,8 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 // @Security BearerAuth
 // @Router /api/v1/profile [patch]
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	userUUID, exists := c.Get("user_uuid")
-	if !exists {
+	claims, err := auth.GetTokenClaims(c)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
@@ -125,7 +126,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := h.userRepo.UpdateUser(userUUID.(uuid.UUID), updates)
+	updatedUser, err := h.userRepo.UpdateUser(uuid.MustParse(claims.UserID), updates)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate") {
 			c.JSON(http.StatusConflict, gin.H{"error": "Phone number already exists"})
