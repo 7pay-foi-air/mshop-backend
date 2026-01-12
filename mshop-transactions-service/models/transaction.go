@@ -35,10 +35,41 @@ type TransactionHistory struct {
 	Currency            string     `json:"currency"`
 	TransactionDate     string     `json:"transaction_date"`
 	TransactionRefundID *uuid.UUID `json:"transaction_refund_id"`
+	PaymentMethod       string     `json:"payment_method"`
+	UUIDOrganisation    uuid.UUID  `json:"uuid_organisation"`
+	TransactionType     string     `json:"transaction_type"`
+	UUIDUser            uuid.UUID  `json:"uuid_user"`
 }
 
 // swagger:model TransactionHistoryResponse
 type TransactionHistoryResponse struct {
 	SuccessfulTransactions []TransactionHistory `json:"successful_transactions"`
 	RefundedTransactions   []TransactionHistory `json:"refunded_transactions"`
+}
+
+// swagger:model RefundTransactionRequest
+type RefundTransactionRequest struct {
+	UUIDTransaction uuid.UUID `json:"uuid_transaction" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Description     string    `json:"description" example:"Customer requested refund"`
+}
+
+// swagger:model TransactionItemDetail
+type TransactionItemDetail struct {
+	UUIDItem  uuid.UUID `json:"uuid_item"`
+	ItemName  string    `json:"item_name"`
+	ItemPrice float64   `json:"item_price"`
+	Quantity  int       `json:"quantity"`
+	Subtotal  float64   `json:"subtotal"`
+}
+
+// swagger:model TransactionDetailsResponse
+type TransactionDetailsResponse struct {
+	UUIDTransaction     uuid.UUID               `json:"uuid_transaction"`
+	TransactionType     string                  `json:"transaction_type"` // Purchase / Refund
+	TotalAmount         float64                 `json:"total_amount"`
+	Currency            string                  `json:"currency"`
+	TransactionDate     string                  `json:"transaction_date"` // created_at
+	TransactionRefundID *uuid.UUID              `json:"transaction_refund_id"`
+	PaymentMethod       string                  `json:"payment_method"`
+	Items               []TransactionItemDetail `json:"items"`
 }
