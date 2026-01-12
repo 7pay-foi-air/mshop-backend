@@ -235,7 +235,6 @@ func (r *userRepository) UpdateUserByAdmin(userUUID uuid.UUID, updates map[strin
 		"username":      true,
 		"role":          true,
 		"is_active":     true,
-		"is_admin":      true,
 	}
 
 	setClauses := []string{}

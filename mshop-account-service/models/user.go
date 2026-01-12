@@ -20,6 +20,5 @@ type AdminUpdateUserRequest struct {
 	Email       *string `json:"email"`
 	Username    *string `json:"username"`
 	Role        *string `json:"role"`
-	IsAdmin     *bool   `json:"is_admin"`
 	IsActive    *bool   `json:"is_active"`
 }

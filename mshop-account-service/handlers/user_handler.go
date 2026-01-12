@@ -199,7 +199,7 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 		updates["username"] = *req.Username
 	}
 	if req.Role != nil {
-		validRoles := map[string]bool{"owner": true, "admin": true, "cashier": true}
+		validRoles := map[string]bool{"admin": true, "cashier": true}
 		if !validRoles[*req.Role] {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role. Must be: owner, admin, or cashier"})
 			return
@@ -208,9 +208,6 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	}
 	if req.IsActive != nil {
 		updates["is_active"] = *req.IsActive
-	}
-	if req.IsAdmin != nil {
-		updates["is_admin"] = *req.IsAdmin
 	}
 	if len(updates) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
