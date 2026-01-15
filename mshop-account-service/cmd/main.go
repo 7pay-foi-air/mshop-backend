@@ -66,6 +66,8 @@ func main() {
 		admin.POST("/register", handlers.RegisterHandler)
 
 		admin.PATCH("/users/:userId", userHandler.UpdateUserByAdmin)
+
+		admin.DELETE("/users/:userId", userHandler.DeleteUser)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

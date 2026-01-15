@@ -16,6 +16,7 @@ type UserRepository interface {
 	GetUserByID(id uuid.UUID) (*models.UserDB, error)
 	UpdateUser(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error)
 	UpdateUserByAdmin(userUUID uuid.UUID, updates map[string]interface{}) (*models.UserDB, error)
+	DeleteUser(userUUID uuid.UUID) (int64, error)
 }
 
 type userRepository struct {
@@ -287,4 +288,25 @@ func (r *userRepository) UpdateUserByAdmin(userUUID uuid.UUID, updates map[strin
 	}
 
 	return r.GetUserByID(userUUID)
+}
+
+func (r *userRepository) DeleteUser(id uuid.UUID) (int64, error) {
+	query := `
+		UPDATE user_account
+		SET deleted_at = NOW(),
+    		is_active = FALSE
+		WHERE uuid_user = $1
+		AND deleted_at IS NULL
+	`
+	res, err := r.db.Exec(query, id)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get affected rows: %w", err)
+	}
+
+	return affected, nil
 }

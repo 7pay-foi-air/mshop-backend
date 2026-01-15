@@ -231,3 +231,26 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 
 	c.JSON(http.StatusOK, updatedUser)
 }
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	userIDStr := c.Param("userId")
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	rowsAffected, err := h.userRepo.DeleteUser(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
