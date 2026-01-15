@@ -72,7 +72,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param request body UpdateUserRequest true "User update data"
+// @Param request body models.UpdateUserRequest true "User update data"
 // @Success 200 {object} models.UserDB
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -146,7 +146,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param userId path string true "User UUID"
-// @Param request body AdminUpdateUserRequest true "Admin user update data"
+// @Param request body models.AdminUpdateUserRequest true "Admin user update data"
 // @Success 200 {object} models.UserDB
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -230,4 +230,38 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, updatedUser)
+}
+
+// DeleteUser godoc
+// @Summary Delete user
+// @Description Soft-delete a user by UUID (sets deleted_at timestamp and is_active to false)
+// @Tags User
+// @Param uuid path string true "User UUID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1/users/{uuid} [delete]
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	userIDStr := c.Param("userId")
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	rowsAffected, err := h.userRepo.DeleteUser(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
