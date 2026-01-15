@@ -18,6 +18,7 @@ type CreateTransactionRequest struct {
 	Currency      string                   `json:"currency" example:"EUR"`
 	Description   string                   `json:"description" example:"Kupnja USB-C kabela"`
 	Items         []TransactionItemRequest `json:"items"`
+	TotalAmount   *float64                 `json:"total_amount,omitempty"`
 }
 
 // swagger:model TransactionResponse
