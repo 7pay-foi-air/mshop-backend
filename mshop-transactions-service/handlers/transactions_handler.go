@@ -42,10 +42,6 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
-	if len(req.Items) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Transaction must contain items"})
-		return
-	}
 
 	claims, err := auth.GetTokenClaims(c)
 	if err != nil {
@@ -79,6 +75,15 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 			return
 		}
 		total += subtotal
+	}
+
+	if len(req.Items) == 0 {
+		if req.TotalAmount != nil {
+			total = *req.TotalAmount
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Empty transaction must include totalAmount"})
+			return
+		}
 	}
 
 	if err := h.repo.FinalizeTransaction(tx, txID, total); err != nil {
