@@ -198,11 +198,13 @@ func (h *TransactionHandler) GetTransactionDetails(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.TransactionDetailsResponse{
-		UUIDTransaction: header.UUIDTransaction,
-		TransactionType: header.TransactionType,
-		TotalAmount:     header.TotalAmount,
-		Currency:        header.Currency,
-		TransactionDate: header.TransactionDate,
-		Items:           items,
+		UUIDTransaction:     header.UUIDTransaction,
+		TransactionType:     header.TransactionType,
+		TotalAmount:         header.TotalAmount,
+		Currency:            header.Currency,
+		TransactionDate:     header.TransactionDate,
+		Items:               items,
+		TransactionRefundID: header.TransactionRefundID,
+		PaymentMethod:       header.PaymentMethod,
 	})
 }
