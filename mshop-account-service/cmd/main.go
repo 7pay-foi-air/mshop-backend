@@ -49,6 +49,7 @@ func main() {
 
 	r.POST("api/v1/login", handlers.LoginHandler)
 	r.POST("/api/v1/refresh", handlers.RefreshTokenHandler)
+	r.POST("/api/v1/password/reset", handlers.ResetPasswordHandler)
 
 	protected := r.Group("/api/v1")
 	protected.Use(auth.RequiredAuth())
