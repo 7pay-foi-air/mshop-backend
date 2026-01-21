@@ -101,7 +101,8 @@ func (r *itemRepository) GetItems(ids []uuid.UUID) ([]models.ItemResponse, error
 func (r *itemRepository) DeleteItem(id uuid.UUID) (int64, error) {
 	query := `
 		UPDATE item
-		SET deleted_at = NOW()
+		SET is_active = false,
+			deleted_at = NOW()
 		WHERE uuid_item = $1
 		  AND deleted_at IS NULL
 	`
