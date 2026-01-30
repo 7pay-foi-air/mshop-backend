@@ -23,12 +23,10 @@ func NewReportHandler(repo repositories.TransactionsRepository) *ReportHandler {
 	return &ReportHandler{repo: repo}
 }
 
-// helper funkcija koja formatira float64 u hrvatski currency
 func toHrCurrency(amount float64) string {
 	intPart := int64(amount)
 	fracPart := int64((amount - float64(intPart)) * 100)
 
-	// tisućni separator
 	intStr := fmt.Sprintf("%d", intPart)
 	var result string
 	for i, c := range reverseString(intStr) {
@@ -49,7 +47,6 @@ func reverseString(s string) string {
 	return string(runes)
 }
 
-// CreateReport generira CSV report i šalje ga na email (koristi repo.GetUserTransactions)
 func (h *ReportHandler) CreateReport(c *gin.Context) {
 	var req models.CreateReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,7 +54,6 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 		return
 	}
 
-	// validate dates (format YYYY-MM-DD)
 	if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date (expected YYYY-MM-DD)"})
 		return
@@ -67,7 +63,6 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 		return
 	}
 
-	// auth
 	claims, err := auth.GetTokenClaims(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -78,7 +73,6 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 	role := claims.Role
 	isAdmin := role == "admin" || role == "owner"
 
-	// fetch transactions
 	raw, err := h.repo.GetUserTransactions(userID, orgID, isAdmin, req.StartDate, req.EndDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch transactions: " + err.Error()})

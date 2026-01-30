@@ -308,6 +308,9 @@ const docTemplate = `{
                 "payment_method": {
                     "type": "string",
                     "example": "credit_card"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
