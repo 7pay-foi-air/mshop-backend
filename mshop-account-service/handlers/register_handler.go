@@ -27,7 +27,7 @@ func RegisterHandler(c *gin.Context) {
 	var req models.RegistrationRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid registration payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -43,7 +43,7 @@ func RegisterHandler(c *gin.Context) {
 
 	tx, err := db.DB.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pokretanje transakcije"})
 		return
 	}
 	defer tx.Rollback()
@@ -60,17 +60,17 @@ func RegisterHandler(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno hashiranje lozinke."})
 		return
 	}
 
 	if err := repo.CreateUser(tx, userUUID, req, string(hashedPassword), dateOfBirth); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno kreiranje korisnika."})
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction commit failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno potvrđivanje transakcije."})
 		return
 	}
 
@@ -81,6 +81,6 @@ func RegisterHandler(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Registration successfull",
+		"message": "Registracija uspješna.",
 	})
 }

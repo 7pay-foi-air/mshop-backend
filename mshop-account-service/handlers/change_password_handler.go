@@ -28,7 +28,7 @@ import (
 func ChangePasswordHandler(c *gin.Context) {
 	value, exists := c.Get("claims")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neautoriziran pristup"})
 		return
 	}
 
@@ -37,19 +37,19 @@ func ChangePasswordHandler(c *gin.Context) {
 
 	var req models.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
 	loginRepo := repositories.NewLoginRepository(db.DB)
 	user, err := loginRepo.GetUserByID(userID)
 	if err != nil || user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Korisnik nije pronađen."})
 		return
 	}
 
 	if user.RecoveryTokenHash == nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Recovery token not set"})
+		c.JSON(http.StatusForbidden, gin.H{"error": "Recovery token nije postavljen."})
 		return
 	}
 
@@ -57,13 +57,13 @@ func ChangePasswordHandler(c *gin.Context) {
 		[]byte(*user.RecoveryTokenHash),
 		[]byte(req.RecoveryToken),
 	); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid recovery token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravan recovery token."})
 		return
 	}
 
 	if !validation.ValidatePassword(req.NewPassword) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Password must be at least 10 characters long and contain letters and numbers",
+			"error": "Lozinka mora imati najmanje 10 znakova i sadržavati slova i brojeve.",
 		})
 		return
 	}
@@ -73,7 +73,7 @@ func ChangePasswordHandler(c *gin.Context) {
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno hashiranje lozinke."})
 		return
 	}
 
@@ -82,11 +82,11 @@ func ChangePasswordHandler(c *gin.Context) {
 		user.UUID,
 		string(newPasswordHash),
 	); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno ažuriranje lozinke."})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Password changed successfully",
+		"message": "Lozinka je uspješno promijenjena.",
 	})
 }

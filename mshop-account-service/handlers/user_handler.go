@@ -49,7 +49,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	for _, s := range parts {
 		id, err := uuid.Parse(strings.TrimSpace(s))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan UUID format."})
 			return
 		}
 		parsedUUIDs = append(parsedUUIDs, id)
@@ -58,7 +58,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.userRepo.GetUsers(parsedUUIDs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch users",
+			"error": "Neuspješno dohvaćanje korisnika",
 		})
 		return
 	}
@@ -81,13 +81,13 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	claims, err := auth.GetTokenClaims(c)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Korisnik nije autentificiran."})
 		return
 	}
 
 	var req models.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -105,14 +105,14 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	if req.DateOfBirth != nil {
 		parsedDate, err := time.Parse("2006-01-02", *req.DateOfBirth)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format datuma. Koristite YYYY-MM-DD."})
 			return
 		}
 		updates["date_of_birth"] = parsedDate
 	}
 	if req.PhoneNumber != nil {
 		if strings.TrimSpace(*req.PhoneNumber) == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number cannot be empty"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Broj telefona ne može biti prazan."})
 			return
 		}
 		updates["phone_number"] = *req.PhoneNumber
@@ -122,17 +122,17 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 
 	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nema polja za ažuriranje."})
 		return
 	}
 
 	updatedUser, err := h.userRepo.UpdateUser(uuid.MustParse(claims.UserID), updates)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate") {
-			c.JSON(http.StatusConflict, gin.H{"error": "Phone number already exists"})
+			c.JSON(http.StatusConflict, gin.H{"error": "Broj telefona već postoji."})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno ažuriranje profila."})
 		return
 	}
 
@@ -157,13 +157,13 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	userIDStr := c.Param("userId")
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan ID korisnika."})
 		return
 	}
 
 	var req models.AdminUpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -178,7 +178,7 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	if req.DateOfBirth != nil {
 		parsedDate, err := time.Parse("2006-01-02", *req.DateOfBirth)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format datuma. Koristite YYYY-MM-DD."})
 			return
 		}
 		updates["date_of_birth"] = parsedDate
@@ -191,7 +191,7 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	}
 	if req.Email != nil {
 		if strings.TrimSpace(*req.Email) != "" && !strings.Contains(*req.Email, "@") {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format emaila."})
 			return
 		}
 		updates["email"] = *req.Email
@@ -202,7 +202,7 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 	if req.Role != nil {
 		validRoles := map[string]bool{"admin": true, "cashier": true}
 		if !validRoles[*req.Role] {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role. Must be: owner, admin, or cashier"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravna uloga. Mora biti: owner, admin ili cashier."})
 			return
 		}
 		updates["role"] = *req.Role
@@ -211,21 +211,21 @@ func (h *UserHandler) UpdateUserByAdmin(c *gin.Context) {
 		updates["is_active"] = *req.IsActive
 	}
 	if len(updates) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nema polja za ažuriranje."})
 		return
 	}
 
 	updatedUser, err := h.userRepo.UpdateUserByAdmin(userID, updates)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Korisnik nije pronađen."})
 			return
 		}
 		if strings.Contains(err.Error(), "duplicate") || strings.Contains(err.Error(), "unique") {
-			c.JSON(http.StatusConflict, gin.H{"error": "Email, username or phone number already exists"})
+			c.JSON(http.StatusConflict, gin.H{"error": "Email, korisničko ime ili broj telefona već postoji."})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno ažuriranje korisnika."})
 		return
 	}
 
@@ -248,20 +248,20 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan ID korisnika."})
 		return
 	}
 
 	rowsAffected, err := h.userRepo.DeleteUser(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno brisanje korisnika."})
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Korisnik nije pronađen."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Korisnik je uspješno obrisan."})
 }
