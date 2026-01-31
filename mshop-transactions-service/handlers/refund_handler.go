@@ -28,7 +28,7 @@ func (h *TransactionHandler) RefundTransaction(c *gin.Context) {
 	var req models.RefundTransactionRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -42,12 +42,12 @@ func (h *TransactionHandler) RefundTransaction(c *gin.Context) {
 
 	original, err := h.repo.GetTransactionByID(req.UUIDTransaction)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Transaction not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transakcija nije pronađena."})
 		return
 	}
 
 	if original.TransactionRefundID != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Transaction already refunded"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Transakcija je već refundirana."})
 		return
 	}
 
@@ -58,7 +58,7 @@ func (h *TransactionHandler) RefundTransaction(c *gin.Context) {
 
 	tx, err := db.DB.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pokretanje transakcije."})
 		return
 	}
 	defer tx.Rollback()
@@ -66,13 +66,13 @@ func (h *TransactionHandler) RefundTransaction(c *gin.Context) {
 	refundID, err := h.repo.CreateRefundTransaction(tx, original, userID, description)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
+			"error": "Neuspješno kreiranje refund transakcije.",
 		})
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Commit failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno potvrđivanje transakcije."})
 		return
 	}
 

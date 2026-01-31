@@ -29,7 +29,7 @@ import (
 func LoginHandler(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid login payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -46,12 +46,12 @@ func LoginHandler(c *gin.Context) {
 	loginRepo := repositories.NewLoginRepository(db.DB)
 	user, err := loginRepo.GetUserByUsername(req.Username)
 	if err != nil || user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
 		return
 	}
 
 	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Račun nije aktivan."})
 		return
 	}
 
@@ -59,7 +59,7 @@ func LoginHandler(c *gin.Context) {
 		[]byte(user.PasswordHash),
 		[]byte(req.Password),
 	); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
 		return
 	}
 
@@ -74,18 +74,18 @@ func LoginHandler(c *gin.Context) {
 		orgID,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje pristupnog tokena."})
 		return
 	}
 
 	refreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje osvježavajućeg tokena."})
 		return
 	}
 
 	response := gin.H{
-		"message":       "Login successful",
+		"message":       "Prijava uspješna",
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"role":          user.Role,
@@ -99,13 +99,13 @@ func LoginHandler(c *gin.Context) {
 			bcrypt.DefaultCost,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate recovery token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje recovery tokena."})
 			return
 		}
 
 		regRepo := repositories.NewRegistrationRepository(db.DB)
 		if err := regRepo.SetRecoveryToken(user.UUID, string(recoveryHash)); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store recovery token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pohranjivanje recovery tokena."})
 			return
 		}
 

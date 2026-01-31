@@ -50,16 +50,16 @@ func reverseString(s string) string {
 func (h *ReportHandler) CreateReport(c *gin.Context) {
 	var req models.CreateReportRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev: " + err.Error()})
 		return
 	}
 
 	if _, err := time.Parse("2006-01-02", req.StartDate); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date (expected YYYY-MM-DD)"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan start_date (očekivani format YYYY-MM-DD)"})
 		return
 	}
 	if _, err := time.Parse("2006-01-02", req.EndDate); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end_date (expected YYYY-MM-DD)"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan end_date (očekivani format YYYY-MM-DD)"})
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 
 	raw, err := h.repo.GetUserTransactions(userID, orgID, isAdmin, req.StartDate, req.EndDate)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch transactions: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno dohvaćanje transakcija: " + err.Error()})
 		return
 	}
 
@@ -101,7 +101,7 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 		"Metoda placanja",
 	}
 	if err := writer.Write(header); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write CSV header"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pisanje zaglavlja CSV datoteke."})
 		return
 	}
 
@@ -139,13 +139,13 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 			method,
 		}
 		if err := writer.Write(record); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write CSV record"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pisanje zapisa u CSV datoteku."})
 			return
 		}
 	}
 	writer.Flush()
 	if err := writer.Error(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finalize CSV: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno finaliziranje CSV datoteke: " + err.Error()})
 		return
 	}
 
@@ -168,7 +168,7 @@ func (h *ReportHandler) CreateReport(c *gin.Context) {
 	body := "Poštovani,\n\rU privitku se nalazi zatraženi transakcijski izvještaj."
 
 	if err := SendEmail(req.Email, subject, body, attachment); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno slanje e-pošte: " + err.Error()})
 		return
 	}
 

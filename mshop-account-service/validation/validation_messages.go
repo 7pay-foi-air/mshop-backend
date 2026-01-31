@@ -2,35 +2,35 @@ package validation
 
 var ValidationMessages = map[string]FieldError{
 	"required": {
-		Message: "%s is required",
-		Reason:  "This field is mandatory but missing from the request",
+		Message: "%s je obavezno polje",
+		Reason:  "Ovo polje je obavezno i nedostaje u zahtjevu",
 	},
 	"email": {
-		Message: "%s is not a valid email",
-		Reason:  "The provided value does not match standard email format",
+		Message: "%s nije ispravan email",
+		Reason:  "Unesena vrijednost ne odgovara standardnom formatu emaila",
 	},
 	"numeric": {
-		Message: "%s must be a number",
-		Reason:  "Only numeric characters are allowed for this field",
+		Message: "%s mora biti broj",
+		Reason:  "Dozvoljeni su samo numerički znakovi za ovo polje",
 	},
 	"datetime": {
-		Message: "%s is not a valid date",
-		Reason:  "The date format must be YYYY-MM-DD",
+		Message: "%s nije ispravan datum",
+		Reason:  "Format datuma mora biti YYYY-MM-DD",
 	},
 	"min": {
-		Message: "%s is too short",
-		Reason:  "This field does not meet minimum length requirements",
+		Message: "%s je prekratak",
+		Reason:  "Ovo polje ne zadovoljava minimalne zahtjeve za duljinu",
 	},
 	"len": {
-		Message: "%s has invalid length",
-		Reason:  "Expected exact length according to validation rule",
+		Message: "%s ima neispravnu duljinu",
+		Reason:  "Ovo polje ne zadovoljava zahtjeve za točnu duljinu prema pravilu validacije",
 	},
 	"oib": {
-		Message: "%s must contain exactly 11 digits",
-		Reason:  "OIB requires exactly 11 numeric digits",
+		Message: "%s mora sadržavati točno 11 znamenki",
+		Reason:  "OIB zahtijeva točno 11 numeričkih znamenki",
 	},
 	"telephone": {
-		Message: "%s is not a valid telephone number",
-		Reason:  "The provided value does not match a standard telephone number",
+		Message: "%s nije ispravan broj telefona",
+		Reason:  "Unesena vrijednost ne odgovara standardnom formatu broja telefona",
 	},
 }

@@ -68,7 +68,7 @@ func ValidateFormat(err validator.FieldError) FieldError {
 
 	return FieldError{
 		Field:   err.Field(),
-		Message: fmt.Sprintf("%s failed validation rule '%s'", err.Field(), tag),
-		Reason:  "The provided value failed an unrecognized validation rule",
+		Message: fmt.Sprintf("%s nije prošlo pravilo validacije '%s'", err.Field(), tag),
+		Reason:  "Unesena vrijednost nije zadovoljila neprepoznato pravilo validacije.",
 	}
 }
