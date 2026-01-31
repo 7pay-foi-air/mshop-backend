@@ -135,7 +135,15 @@ func (r *transactionsRepository) GetUserTransactions(userID uuid.UUID, orgID uui
 
 func (r *transactionsRepository) buildTransactionQuery(userID uuid.UUID, orgID uuid.UUID, isAdmin bool, startDate, endDate string) (string, []interface{}) {
 	query := `
-		SELECT uuid_transaction, total_amount, currency, created_at, uuid_refund_to_transaction
+		SELECT uuid_transaction,
+			total_amount,
+			currency,
+			created_at,
+			uuid_refund_to_transaction,
+			payment_method,
+			uuid_organisation,
+			transaction_type,
+			uuid_user
 		FROM transaction
 		WHERE uuid_organisation = $1 AND is_successful = true`
 
@@ -176,6 +184,10 @@ func (r *transactionsRepository) scanTransactions(rows *sql.Rows) ([]models.Tran
 			&t.Currency,
 			&t.TransactionDate,
 			&t.TransactionRefundID,
+			&t.PaymentMethod,
+			&t.UUIDOrganisation,
+			&t.TransactionType,
+			&t.UUIDUser,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan transaction: %w", err)
