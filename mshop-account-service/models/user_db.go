@@ -26,4 +26,6 @@ type UserDB struct {
 	OrganisationUUID      *uuid.UUID `json:"uuid_organisation"`
 	SecurityQuestionsHash *string    `db:"security_questions_hash"`
 	RecoveryCodeLocation  *string    `db:"recovery_code_location"`
+	IsLocked              bool       `db:"is_locked"`
+	LockoutCounter        int        `db:"lockout_counter"`
 }

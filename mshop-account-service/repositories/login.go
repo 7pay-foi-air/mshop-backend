@@ -36,7 +36,9 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
         deleted_at,
         is_active,
         role,
-        uuid_organisation
+        uuid_organisation,
+		lockout_counter,
+		is_locked
 	FROM user_account
 	WHERE username = $1 AND deleted_at IS NULL
 	`
@@ -60,6 +62,8 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
 		&user.IsActive,
 		&user.Role,
 		&user.OrganisationUUID,
+		&user.IsLocked,
+		&user.LockoutCounter,
 	)
 
 	if err != nil {
@@ -127,4 +131,23 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
 	}
 
 	return &user, nil
+}
+func (r *LoginRepository) UpdateLoginSecurity(user *models.UserDB) error {
+	query := `
+	UPDATE user_account
+	SET 
+		lockout_counter = $1,
+		is_locked = $2,
+		updated_at = NOW()
+	WHERE uuid_user = $3
+	`
+
+	_, err := r.db.Exec(
+		query,
+		user.LockoutCounter,
+		user.IsLocked,
+		user.UUID,
+	)
+
+	return err
 }
