@@ -72,7 +72,10 @@ func LoginHandler(c *gin.Context) {
 			user.IsLocked = true
 		}
 
-		_ = loginRepo.UpdateLoginSecurity(user)
+		if updateErr := loginRepo.UpdateLoginSecurity(user); updateErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Greška pri ažuriranju sigurnosnih podataka."})
+			return
+		}
 
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
 		return

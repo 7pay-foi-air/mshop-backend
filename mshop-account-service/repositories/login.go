@@ -36,7 +36,9 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
         deleted_at,
         is_active,
         role,
-        uuid_organisation
+        uuid_organisation,
+		lockout_counter,
+		is_locked
 	FROM user_account
 	WHERE username = $1 AND deleted_at IS NULL
 	`
@@ -60,6 +62,8 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
 		&user.IsActive,
 		&user.Role,
 		&user.OrganisationUUID,
+		&user.IsLocked,
+		&user.LockoutCounter,
 	)
 
 	if err != nil {
