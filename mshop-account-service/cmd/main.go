@@ -50,7 +50,8 @@ func main() {
 	r.POST("api/v1/login", handlers.LoginHandler)
 	r.POST("/api/v1/refresh", handlers.RefreshTokenHandler)
 	r.POST("/api/v1/password/reset", handlers.ResetPasswordHandler)
-
+	r.POST("/api/v1/security/questions", handlers.SetSecurityQuestionsHandler)
+	r.POST("/api/v1/security/questions/verify", handlers.VerifySecurityQuestionsHandler)
 	protected := r.Group("/api/v1")
 	protected.Use(auth.RequiredAuth())
 	{
