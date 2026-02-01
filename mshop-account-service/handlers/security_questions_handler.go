@@ -24,12 +24,6 @@ import (
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/security/questions [post]
 func SetSecurityQuestionsHandler(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neautorizirani pristup."})
-		return
-	}
-
 	var req models.SetSecurityQuestionsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
@@ -48,7 +42,7 @@ func SetSecurityQuestionsHandler(c *gin.Context) {
 
 	securityRepo := repositories.NewSecurityRepository(db.DB)
 	err = securityRepo.SetSecurityQuestions(
-		userID.(string),
+		req.Username,
 		string(questionsHash),
 		req.RecoveryCodeLocation,
 	)
@@ -76,11 +70,6 @@ func SetSecurityQuestionsHandler(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/security/questions/verify [post]
 func VerifySecurityQuestionsHandler(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neautorizirani pristup."})
-		return
-	}
 
 	var req models.SetSecurityQuestionsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -89,7 +78,7 @@ func VerifySecurityQuestionsHandler(c *gin.Context) {
 	}
 
 	securityRepo := repositories.NewSecurityRepository(db.DB)
-	storedHash, err := securityRepo.GetSecurityQuestions(userID.(string))
+	storedHash, err := securityRepo.GetSecurityQuestions(req.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Greška pri dohvaćanju podataka."})
 		return
