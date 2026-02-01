@@ -44,6 +44,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	loginRepo := repositories.NewLoginRepository(db.DB)
+
 	user, err := loginRepo.GetUserByUsername(req.Username)
 	if err != nil || user == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
@@ -55,13 +56,31 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	if user.IsLocked {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Račun je zaključan. 3 puta ste neuspješno unesli lozinku."})
+		return
+	}
+
 	if err := bcrypt.CompareHashAndPassword(
 		[]byte(user.PasswordHash),
 		[]byte(req.Password),
 	); err != nil {
+
+		user.LockoutCounter++
+
+		if user.LockoutCounter >= 3 {
+			user.IsLocked = true
+		}
+
+		_ = loginRepo.UpdateLoginSecurity(user)
+
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
 		return
 	}
+
+	user.LockoutCounter = 0
+	user.IsLocked = false
+	_ = loginRepo.UpdateLoginSecurity(user)
 
 	orgID := ""
 	if user.OrganisationUUID != nil {
