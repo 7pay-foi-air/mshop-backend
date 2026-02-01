@@ -354,6 +354,142 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/security/questions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Saves hashed security questions (answer1+answer2+answer3) and recovery code location",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Security"
+                ],
+                "summary": "Set security questions and recovery code location",
+                "parameters": [
+                    {
+                        "description": "Security questions and recovery location",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SetSecurityQuestionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/security/questions/verify": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Verifies if provided answers match stored hash",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Security"
+                ],
+                "summary": "Verify security questions",
+                "parameters": [
+                    {
+                        "description": "Security answers to verify",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SetSecurityQuestionsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "security": [
@@ -695,6 +831,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.SetSecurityQuestionsRequest": {
+            "type": "object",
+            "required": [
+                "answer1",
+                "answer2",
+                "answer3",
+                "recovery_code_location"
+            ],
+            "properties": {
+                "answer1": {
+                    "type": "string"
+                },
+                "answer2": {
+                    "type": "string"
+                },
+                "answer3": {
+                    "type": "string"
+                },
+                "recovery_code_location": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateUserRequest": {
             "type": "object",
             "properties": {
@@ -736,19 +895,10 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "email_verification_expires_at": {
-                    "type": "string"
-                },
-                "email_verification_token_hash": {
-                    "type": "string"
-                },
                 "first_name": {
                     "type": "string"
                 },
                 "is_active": {
-                    "type": "boolean"
-                },
-                "is_email_verified": {
                     "type": "boolean"
                 },
                 "last_login_at": {
@@ -763,10 +913,16 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string"
                 },
+                "recoveryCodeLocation": {
+                    "type": "string"
+                },
                 "recovery_token_hash": {
                     "type": "string"
                 },
                 "role": {
+                    "type": "string"
+                },
+                "securityQuestionsHash": {
                     "type": "string"
                 },
                 "updated_at": {
