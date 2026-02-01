@@ -37,8 +37,10 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
         is_active,
         role,
         uuid_organisation,
-		lockout_counter,
-		is_locked
+		recovery_code_location,
+		security_questions_hash,
+		is_locked,
+		lockout_counter
 	FROM user_account
 	WHERE username = $1 AND deleted_at IS NULL
 	`
@@ -62,6 +64,8 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
 		&user.IsActive,
 		&user.Role,
 		&user.OrganisationUUID,
+		&user.RecoveryCodeLocation,
+		&user.SecurityQuestionsHash,
 		&user.IsLocked,
 		&user.LockoutCounter,
 	)
