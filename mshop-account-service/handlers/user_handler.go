@@ -128,10 +128,17 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
 	updatedUser, err := h.userRepo.UpdateUser(uuid.MustParse(claims.UserID), updates)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate") {
+		msg := err.Error()
+
+		if strings.Contains(msg, "phone") {
 			c.JSON(http.StatusConflict, gin.H{"error": "Broj telefona već postoji."})
 			return
 		}
+		if strings.Contains(msg, "email") {
+			c.JSON(http.StatusConflict, gin.H{"error": "Email već postoji."})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno ažuriranje profila."})
 		return
 	}
