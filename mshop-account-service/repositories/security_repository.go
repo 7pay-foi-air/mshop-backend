@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type SecurityRepository struct {
@@ -55,4 +57,28 @@ func (r *SecurityRepository) GetSecurityQuestions(username string) (string, stri
 	}
 
 	return questionsHash, recoveryCodeLocation, nil
+}
+
+func (r *SecurityRepository) GetRecoveryLocationByUserUUID(userUUID uuid.UUID) (string, bool, bool, error) {
+	var location sql.NullString
+	var isActive bool
+	var isLocked bool
+
+	query := `
+		SELECT recovery_code_location, is_active, is_locked
+		FROM user_account
+		WHERE uuid_user = $1 AND deleted_at IS NULL
+	`
+
+	err := r.db.QueryRow(query, userUUID).Scan(&location, &isActive, &isLocked)
+	if err != nil {
+		// ako nema reda, Scan vraća sql.ErrNoRows
+		return "", false, false, err
+	}
+
+	if !location.Valid {
+		return "", isActive, isLocked, nil
+	}
+
+	return location.String, isActive, isLocked, nil
 }

@@ -60,6 +60,8 @@ func main() {
 		protected.PATCH("/profile", userHandler.UpdateProfile)
 
 		protected.GET("/users", userHandler.GetUsers)
+
+		protected.GET("/recovery/location", handlers.GetRecoveryCodeLocationHandler)
 	}
 
 	admin := protected.Group("/")
