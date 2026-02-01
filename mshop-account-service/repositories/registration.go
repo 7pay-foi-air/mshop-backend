@@ -67,7 +67,9 @@ func (r *RegistrationRepository) ChangePasswordWithRecovery(
 		UPDATE user_account
 		SET
 			password_hash = $1,
-			updated_at = now()
+			updated_at = now(),
+			lockout_counter = 0,
+			is_locked = fase
 		WHERE uuid_user = $2
 		  AND deleted_at IS NULL
 	`, newPasswordHash, userID)

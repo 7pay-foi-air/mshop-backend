@@ -448,7 +448,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SetSecurityQuestionsRequest"
+                            "$ref": "#/definitions/models.GetSecurityQuestions"
                         }
                     }
                 ],
@@ -737,6 +737,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.GetSecurityQuestions": {
+            "type": "object",
+            "required": [
+                "answer1",
+                "answer2",
+                "answer3",
+                "username"
+            ],
+            "properties": {
+                "answer1": {
+                    "type": "string"
+                },
+                "answer2": {
+                    "type": "string"
+                },
+                "answer3": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
             "required": [
@@ -837,7 +860,8 @@ const docTemplate = `{
                 "answer1",
                 "answer2",
                 "answer3",
-                "recovery_code_location"
+                "recovery_code_location",
+                "username"
             ],
             "properties": {
                 "answer1": {
@@ -850,6 +874,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "recovery_code_location": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -898,6 +925,9 @@ const docTemplate = `{
                 "first_name": {
                     "type": "string"
                 },
+                "isLocked": {
+                    "type": "boolean"
+                },
                 "is_active": {
                     "type": "boolean"
                 },
@@ -906,6 +936,9 @@ const docTemplate = `{
                 },
                 "last_name": {
                     "type": "string"
+                },
+                "lockoutCounter": {
+                    "type": "integer"
                 },
                 "password_hash": {
                     "type": "string"

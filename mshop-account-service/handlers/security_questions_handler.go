@@ -63,7 +63,7 @@ func SetSecurityQuestionsHandler(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param request body models.SetSecurityQuestionsRequest true "Security answers to verify"
+// @Param request body models.GetSecurityQuestions true "Security answers to verify"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
@@ -71,14 +71,14 @@ func SetSecurityQuestionsHandler(c *gin.Context) {
 // @Router /api/v1/security/questions/verify [post]
 func VerifySecurityQuestionsHandler(c *gin.Context) {
 
-	var req models.SetSecurityQuestionsRequest
+	var req models.GetSecurityQuestions
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
 	securityRepo := repositories.NewSecurityRepository(db.DB)
-	storedHash, err := securityRepo.GetSecurityQuestions(req.Username)
+	storedHash, recoveryCodeLocation, err := securityRepo.GetSecurityQuestions(req.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Greška pri dohvaćanju podataka."})
 		return
@@ -98,7 +98,7 @@ func VerifySecurityQuestionsHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Odgovori su točni.",
-		"valid":   true,
+		"recoveryCodeLocation": recoveryCodeLocation,
+		"valid":                true,
 	})
 }

@@ -38,19 +38,21 @@ func (r *SecurityRepository) SetSecurityQuestions(username, questionsHash, recov
 	return nil
 }
 
-func (r *SecurityRepository) GetSecurityQuestions(username string) (string, error) {
+func (r *SecurityRepository) GetSecurityQuestions(username string) (string, string, error) {
 	var questionsHash string
+	var recoveryCodeLocation string
 
 	query := `
-		SELECT security_questions_hash
+		SELECT security_questions_hash, recovery_code_location
 		FROM user_account
 		WHERE username = $1 AND deleted_at IS NULL
 	`
 
-	err := r.db.QueryRow(query, username).Scan(&questionsHash)
+	err := r.db.QueryRow(query, username).
+		Scan(&questionsHash, &recoveryCodeLocation)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return questionsHash, nil
+	return questionsHash, recoveryCodeLocation, nil
 }
