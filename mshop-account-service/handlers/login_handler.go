@@ -14,18 +14,22 @@ import (
 
 // LoginHandler godoc
 // @Summary Login user
-// @Description Receives username/password, returns access + refresh token
+// @Description Receives username/password, returns access + refresh token.
+//
+//	On first login, generates and returns a recovery token (shown only once).
+//
 // @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param request body models.LoginRequest true "User login credentials"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Router /api/v1/login [post]
 func LoginHandler(c *gin.Context) {
 	var req models.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid login payload"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -39,44 +43,96 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	repo := repositories.NewLoginRepository(db.DB)
-	user, err := repo.GetUserByUsername(req.Username)
+	loginRepo := repositories.NewLoginRepository(db.DB)
+
+	user, err := loginRepo.GetUserByUsername(req.Username)
 	if err != nil || user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
 		return
 	}
 
 	if !user.IsActive {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Account is not active"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Račun nije aktivan."})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if user.IsLocked {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Račun je zaključan. 3 puta ste neuspješno unesli lozinku."})
 		return
 	}
+
+	if err := bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(req.Password),
+	); err != nil {
+
+		user.LockoutCounter++
+
+		if user.LockoutCounter >= 3 {
+			user.IsLocked = true
+		}
+
+		if updateErr := loginRepo.UpdateLoginSecurity(user); updateErr != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Greška pri ažuriranju sigurnosnih podataka."})
+			return
+		}
+
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravni podaci za prijavu."})
+		return
+	}
+
+	user.LockoutCounter = 0
+	user.IsLocked = false
+	_ = loginRepo.UpdateLoginSecurity(user)
 
 	orgID := ""
 	if user.OrganisationUUID != nil {
 		orgID = user.OrganisationUUID.String()
 	}
 
-	accessToken, err := auth.GenerateAccessToken(user.UUID.String(), user.Role, orgID)
+	accessToken, err := auth.GenerateAccessToken(
+		user.UUID.String(),
+		user.Role,
+		orgID,
+	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje pristupnog tokena."})
 		return
 	}
 
 	refreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje osvježavajućeg tokena."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":       "Login successful",
+	response := gin.H{
+		"message":       "Prijava uspješna",
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"role":          user.Role,
-	})
+	}
+
+	if user.RecoveryTokenHash == nil {
+		recoveryToken := GenerateRecoveryToken()
+
+		recoveryHash, err := bcrypt.GenerateFromPassword(
+			[]byte(recoveryToken),
+			bcrypt.DefaultCost,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje recovery tokena."})
+			return
+		}
+
+		regRepo := repositories.NewRegistrationRepository(db.DB)
+		if err := regRepo.SetRecoveryToken(user.UUID, string(recoveryHash)); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pohranjivanje recovery tokena."})
+			return
+		}
+
+		response["recovery_token"] = recoveryToken
+	}
+
+	c.JSON(http.StatusOK, response)
 }

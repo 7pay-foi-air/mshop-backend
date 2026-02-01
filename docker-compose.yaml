@@ -120,6 +120,8 @@ services:
       - articles-db
     networks:
       - app-network
+    volumes:
+      - articles-uploads:/app/mshop-articles-service/uploads
 
   articles-db:
     image: postgres:15
@@ -163,3 +165,4 @@ volumes:
   account-db-data:
   transactions-db-data:
   articles-db-data:
+  articles-uploads:

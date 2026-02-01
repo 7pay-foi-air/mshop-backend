@@ -25,7 +25,6 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
         last_name,
         username,
         email,
-        is_email_verified,
         phone_number,
         date_of_birth,
         address,
@@ -36,10 +35,12 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
         updated_at,
         deleted_at,
         is_active,
-        email_verification_token_hash,
-        email_verification_expires_at,
         role,
-        uuid_organisation
+        uuid_organisation,
+		recovery_code_location,
+		security_questions_hash,
+		is_locked,
+		lockout_counter
 	FROM user_account
 	WHERE username = $1 AND deleted_at IS NULL
 	`
@@ -51,7 +52,6 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
 		&user.LastName,
 		&user.Username,
 		&user.Email,
-		&user.IsEmailVerified,
 		&user.PhoneNumber,
 		&user.DateOfBirth,
 		&user.Address,
@@ -62,10 +62,12 @@ func (r *LoginRepository) GetUserByUsername(username string) (*models.UserDB, er
 		&user.UpdatedAt,
 		&user.DeletedAt,
 		&user.IsActive,
-		&user.EmailVerificationTokenHash,
-		&user.EmailVerificationExpiresAt,
 		&user.Role,
 		&user.OrganisationUUID,
+		&user.RecoveryCodeLocation,
+		&user.SecurityQuestionsHash,
+		&user.IsLocked,
+		&user.LockoutCounter,
 	)
 
 	if err != nil {
@@ -88,7 +90,6 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
         last_name,
         username,
         email,
-        is_email_verified,
         phone_number,
         date_of_birth,
         address,
@@ -99,8 +100,6 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
         updated_at,
         deleted_at,
         is_active,
-        email_verification_token_hash,
-        email_verification_expires_at,
         role,
         uuid_organisation
 	FROM user_account
@@ -114,7 +113,6 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
 		&user.LastName,
 		&user.Username,
 		&user.Email,
-		&user.IsEmailVerified,
 		&user.PhoneNumber,
 		&user.DateOfBirth,
 		&user.Address,
@@ -125,8 +123,6 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
 		&user.UpdatedAt,
 		&user.DeletedAt,
 		&user.IsActive,
-		&user.EmailVerificationTokenHash,
-		&user.EmailVerificationExpiresAt,
 		&user.Role,
 		&user.OrganisationUUID,
 	)
@@ -139,4 +135,23 @@ func (r *LoginRepository) GetUserByID(userID string) (*models.UserDB, error) {
 	}
 
 	return &user, nil
+}
+func (r *LoginRepository) UpdateLoginSecurity(user *models.UserDB) error {
+	query := `
+	UPDATE user_account
+	SET 
+		lockout_counter = $1,
+		is_locked = $2,
+		updated_at = NOW()
+	WHERE uuid_user = $3
+	`
+
+	_, err := r.db.Exec(
+		query,
+		user.LockoutCounter,
+		user.IsLocked,
+		user.UUID,
+	)
+
+	return err
 }

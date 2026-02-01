@@ -11,6 +11,7 @@ import (
 	"github.com/mshop/account-service/db"
 	"github.com/mshop/account-service/docs"
 	"github.com/mshop/account-service/handlers"
+	"github.com/mshop/account-service/repositories"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -22,6 +23,9 @@ import (
 // @host localhost:8080
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
@@ -33,6 +37,9 @@ func main() {
 
 	db.Init()
 
+	userRepo := repositories.NewUserRepository(db.DB)
+	userHandler := handlers.NewUserHandler(userRepo)
+
 	r := gin.Default()
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -41,16 +48,31 @@ func main() {
 	})
 
 	r.POST("api/v1/login", handlers.LoginHandler)
-
 	r.POST("/api/v1/refresh", handlers.RefreshTokenHandler)
-
+	r.POST("/api/v1/password/reset", handlers.ResetPasswordHandler)
+	r.POST("/api/v1/security/questions", handlers.SetSecurityQuestionsHandler)
+	r.POST("/api/v1/security/questions/verify", handlers.VerifySecurityQuestionsHandler)
 	protected := r.Group("/api/v1")
 	protected.Use(auth.RequiredAuth())
+	{
+		protected.POST("/password/change", handlers.ChangePasswordHandler)
+
+		protected.PATCH("/profile", userHandler.UpdateProfile)
+
+		protected.GET("/users", userHandler.GetUsers)
+
+		protected.GET("/recovery/location", handlers.GetRecoveryCodeLocationHandler)
+	}
 
 	admin := protected.Group("/")
 	admin.Use(auth.RequiredAdmin())
+	{
+		admin.POST("/register", handlers.RegisterHandler)
 
-	admin.POST("/register", handlers.RegisterHandler)
+		admin.PATCH("/users/:userId", userHandler.UpdateUserByAdmin)
+
+		admin.DELETE("/users/:userId", userHandler.DeleteUser)
+	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

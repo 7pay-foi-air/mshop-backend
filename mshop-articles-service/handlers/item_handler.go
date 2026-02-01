@@ -55,7 +55,7 @@ func (h *ItemHandler) GetItems(c *gin.Context) {
 	for _, s := range parts {
 		id, err := uuid.Parse(strings.TrimSpace(s))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan UUID format."})
 			return
 		}
 		parsedUUIDs = append(parsedUUIDs, id)
@@ -64,7 +64,7 @@ func (h *ItemHandler) GetItems(c *gin.Context) {
 	items, err := h.itemRepo.GetItems(parsedUUIDs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch items",
+			"error": "Neuspješno dohvaćanje artikala",
 		})
 		return
 	}
@@ -99,20 +99,20 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	sku := c.PostForm("sku")
 	stockQuantityStr := c.PostForm("stock_quantity")
 
-	if name == "" || description == "" || priceStr == "" || currency == "" || stockQuantityStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
+	if name == "" || priceStr == "" || currency == "" || stockQuantityStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nedostaju obavezna polja."})
 		return
 	}
 
 	price, err := strconv.ParseFloat(priceStr, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format cijene."})
 		return
 	}
 
 	stockQuantity, err := strconv.ParseInt(stockQuantityStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid stock quantity format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format količine na skladištu."})
 		return
 	}
 
@@ -120,13 +120,13 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	file, err := c.FormFile("image")
 	if err == nil {
 		if !isValidImageType(file.Header.Get("Content-Type")) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image type. Only JPEG, PNG, and GIF are allowed"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan tip slike. Dozvoljeni su samo JPEG, PNG i GIF."})
 			return
 		}
 
 		const maxFileSize = 5 * 1024 * 1024
 		if file.Size > maxFileSize {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Image size exceeds 5MB limit"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Veličina slike premašuje ograničenje od 5MB."})
 			return
 		}
 
@@ -135,12 +135,12 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 
 		uploadPath := filepath.Join("uploads", "items", filename)
 		if err := os.MkdirAll(filepath.Dir(uploadPath), 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno kreiranje direktorija za upload."})
 			return
 		}
 
 		if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno spremanje slike."})
 			return
 		}
 
@@ -150,7 +150,7 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 
 	tx, err := db.DB.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pokretanje transakcije"})
 		return
 	}
 	defer tx.Rollback()
@@ -163,7 +163,7 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 
 	orgID, err := uuid.Parse(claims.OrgID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid organisation UUID in token"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan UUID organizacije u tokenu."})
 		return
 	}
 
@@ -193,12 +193,12 @@ func (h *ItemHandler) CreateItem(c *gin.Context) {
 	}
 
 	if err := tx.Commit(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno potvrđivanje transakcije."})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message":   "Item created",
+		"message":   "Artikl je kreiran uspješno.",
 		"uuid_item": newID,
 		"image_url": imageURL,
 	})
@@ -222,19 +222,19 @@ func (h *ItemHandler) UpdateItem(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan UUID format."})
 		return
 	}
 
 	itemData := c.PostForm("data")
 	if itemData == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing item data"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nedostaju podaci o artiklu."})
 		return
 	}
 
 	var req models.ItemUpdateRequest
 	if err := json.Unmarshal([]byte(itemData), &req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan JSON format."})
 		return
 	}
 
@@ -242,13 +242,13 @@ func (h *ItemHandler) UpdateItem(c *gin.Context) {
 	file, err := c.FormFile("image")
 	if err == nil {
 		if !isValidImageType(file.Header.Get("Content-Type")) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid image type. Only JPEG, PNG, and GIF are allowed"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan tip slike. Dozvoljeni su samo JPEG, PNG i GIF."})
 			return
 		}
 
 		const maxFileSize = 5 * 1024 * 1024
 		if file.Size > maxFileSize {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Image size exceeds 5MB limit"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Veličina slike premašuje ograničenje od 5MB."})
 			return
 		}
 
@@ -257,12 +257,12 @@ func (h *ItemHandler) UpdateItem(c *gin.Context) {
 		uploadPath := filepath.Join("uploads", "items", filename)
 
 		if err := os.MkdirAll(filepath.Dir(uploadPath), 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create upload directory"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno kreiranje direktorija za upload."})
 			return
 		}
 
 		if err := c.SaveUploadedFile(file, uploadPath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno spremanje slike."})
 			return
 		}
 
@@ -272,16 +272,16 @@ func (h *ItemHandler) UpdateItem(c *gin.Context) {
 
 	rowsAffected, err := h.itemRepo.UpdateItem(id, req, newImageURL)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno ažuriranje artikla."})
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikl nije pronađen."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Artikl je uspješno ažuriran."})
 }
 
 // DeleteItem godoc
@@ -300,22 +300,22 @@ func (h *ItemHandler) DeleteItem(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid UUID format"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan UUID format."})
 		return
 	}
 
 	rowsAffected, err := h.itemRepo.DeleteItem(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno brisanje artikla."})
 		return
 	}
 
 	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Artikl nije pronađen."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Item deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Artikl je uspješno obrisan."})
 }
 
 func isValidImageType(contentType string) bool {

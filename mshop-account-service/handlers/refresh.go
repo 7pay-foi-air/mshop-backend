@@ -25,20 +25,20 @@ type RefreshRequest struct {
 func RefreshTokenHandler(c *gin.Context) {
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing refresh token"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Nedostaje refresh token."})
 		return
 	}
 
 	userID, err := auth.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Neispravan refresh token."})
 		return
 	}
 
 	repo := repositories.NewLoginRepository(db.DB)
 	user, _ := repo.GetUserByID(userID)
 	if user == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Korisnik nije pronađen."})
 		return
 	}
 
@@ -49,13 +49,13 @@ func RefreshTokenHandler(c *gin.Context) {
 
 	newAccessToken, err := auth.GenerateAccessToken(user.UUID.String(), user.Role, orgID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje access tokena."})
 		return
 	}
 
 	newRefreshToken, err := auth.GenerateRefreshToken(user.UUID.String())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno generiranje refresh tokena."})
 		return
 	}
 

@@ -41,6 +41,7 @@ func main() {
 
 	repo := repositories.NewTransactionsRepository(db.DB)
 	handler := handlers.NewTransactionHandler(repo)
+	reportHandler := handlers.NewReportHandler(repo)
 
 	r := gin.Default()
 
@@ -56,6 +57,12 @@ func main() {
 
 	protected.POST("/transactions", handler.CreateTransaction)
 	protected.GET("/transactions", handler.GetUserTransactions)
+	protected.GET("/transactions/:id", handler.GetTransactionDetails)
+
+	protected.POST("/transactions/report", reportHandler.CreateReport)
+
+	admin.POST("/transactions/refund", handler.RefundTransaction)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")

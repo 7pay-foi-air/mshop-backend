@@ -39,11 +39,7 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 	var req models.CreateTransactionRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-	if len(req.Items) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Transaction must contain items"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan zahtjev."})
 		return
 	}
 
@@ -58,14 +54,14 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 
 	tx, err := db.DB.Begin()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start DB transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno pokretanje DB transakcije."})
 		return
 	}
 
 	txID, err := h.repo.CreateTransaction(tx, req, userID, orgID)
 	if err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno kreiranje transakcije."})
 		return
 	}
 
@@ -75,20 +71,29 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		subtotal, err := h.repo.InsertTransactionItem(tx, item, txID)
 		if err != nil {
 			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert item"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno umetanje stavke."})
 			return
 		}
 		total += subtotal
 	}
 
+	if len(req.Items) == 0 {
+		if req.TotalAmount != nil {
+			total = *req.TotalAmount
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Prazna transakcija mora uključivati totalAmount."})
+			return
+		}
+	}
+
 	if err := h.repo.FinalizeTransaction(tx, txID, total); err != nil {
 		tx.Rollback()
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finalize transaction"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno finaliziranje transakcije."})
 		return
 	}
 
 	if err := tx.Commit(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "DB commit failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješan DB commit."})
 		return
 	}
 
@@ -135,4 +140,71 @@ func (h *TransactionHandler) GetUserTransactions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, transactions)
+}
+
+// GetTransactionDetails godoc
+// @Summary Get transaction details
+// @Description Returns transaction basic info + items (items can be empty)
+// @Tags Transactions
+// @Produce json
+// @Param id path string true "Transaction UUID"
+// @Success 200 {object} models.TransactionDetailsResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1/transactions/{id} [get]
+func (h *TransactionHandler) GetTransactionDetails(c *gin.Context) {
+	idStr := c.Param("id")
+	txID, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Neispravan format UUID-a."})
+		return
+	}
+
+	claims, err := auth.GetTokenClaims(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	orgID := uuid.MustParse(claims.OrgID)
+	userID := uuid.MustParse(claims.UserID)
+	role := claims.Role
+	isAdmin := role == "admin" || role == "owner"
+
+	header, err := h.repo.GetTransactionByID(txID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Transakcija nije pronađena."})
+		return
+	}
+
+	if header.UUIDOrganisation != orgID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Zabranjeno"})
+		return
+	}
+
+	if !isAdmin && header.UUIDUser != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Zabranjeno"})
+		return
+	}
+
+	items, err := h.repo.GetTransactionItems(txID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Neuspješno dohvaćanje stavki transakcije."})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.TransactionDetailsResponse{
+		UUIDTransaction:     header.UUIDTransaction,
+		TransactionType:     header.TransactionType,
+		TotalAmount:         header.TotalAmount,
+		Currency:            header.Currency,
+		TransactionDate:     header.TransactionDate,
+		Items:               items,
+		TransactionRefundID: header.TransactionRefundID,
+		PaymentMethod:       header.PaymentMethod,
+	})
 }

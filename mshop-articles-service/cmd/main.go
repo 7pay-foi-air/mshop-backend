@@ -23,6 +23,11 @@ import (
 // @host localhost:8082
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @type apiKey
+// @name Authorization
+// @in header
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
